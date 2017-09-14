@@ -59,6 +59,18 @@ struct Digits
   
   const char* digits() { return (const char*) ull_buf; }  
 
+  char first_digit()
+  {
+    unsigned char i = 0;
+    while( ull_buf[i] == 32 ) i++;
+    return ull_buf[i];
+  }
+
+  char last_digit()
+  {
+    return ull_buf[ ull_digits - 1 ];
+  }
+
 };
 
 
