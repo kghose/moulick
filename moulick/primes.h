@@ -15,38 +15,73 @@ typedef unsigned long long ull;
 ull sqrt(ull m)
 {
     float sqrt_m = m;
-    for(int i = 0; i < 6; i++)
+    for( int i = 0; i < 6; i++ )
         sqrt_m = (sqrt_m * sqrt_m + m) / (2 * sqrt_m);
     return (ull) sqrt_m;
 }
 
 
-/*
-// How many primes <= m do we expect?
-// https://primes.utm.edu/howmany.html
-ull pi(ull m)
+const unsigned char ull_digits = 20;  // log10(2^64 -1)
+
+// Convert an ull to a string
+struct Digits
 {
-  return (ull) (m / log(m));
-}
-*/
+  char ull_buf[ ull_digits + 1 ];  // Null terminated string 
+
+  void set( ull m )
+  {
+    char *s = ull_buf + ull_digits;
+    *s = '\0';  // Null terminated
+    for(int i = 0 ; i < ull_digits ; i++)
+    {
+      s--;
+      *s = m ? (char) (m % 10 + 48) : 32;
+      // Convert remainder to ASCII for 0, 1, 2....
+      // unless m == 0 in which case print a blank
+      m /= 10;
+    }
+  }
+
+  bool is_palindrome()
+  {
+    unsigned char i = 0, j, k;
+    while( ull_buf[i] == 32 ) i++;
+    if( i == ull_digits ) return false;  // Blank
+    for( j = i, k = ull_digits - 1 ;; )
+    {
+      if( ull_buf[j] != ull_buf[k] ) return false;
+      if( (j == k) || (j + 1 == k) ) break;
+      j++;
+      k--;
+    }
+    return true;
+  }
+  
+  const char* digits() { return (const char*) ull_buf; }  
+
+};
 
 
 struct PrimeClock
 {
-  ull current_n,
-      factors_to_check,
-      factors_checked,
+  ull m,      // current number being tested,
+      k_max,  // factors_to_check,
+      k,      // factors_checked,
       last_prime, 
       primes_found,
-      prime_pairs_found;
+      twin_primes_found,
+      palindromic_primes_found;
+  
+  Digits last_prime_digits;
 
   PrimeClock()
   {
-    current_n = 1;
-    factors_to_check = 0;
-    last_prime = 0;
+    m = 1;
+    k_max = 0;
+    last_prime = 1;
     primes_found = 0;
-    prime_pairs_found = 0;
+    twin_primes_found = 0;
+    palindromic_primes_found = 0;
   }
 
   // https://en.wikipedia.org/wiki/Primality_test
@@ -55,25 +90,21 @@ struct PrimeClock
   // variables. This allows us to show the internal progress
   // of the prime test if we pause the function 
   // (e.g. via an interrupt)
-  bool is_prime(ull m)
+  bool is_prime()
   {
-      if (m == 2 | m == 3) return true;
+      if( m == 2 | m == 3 ) return true;
   
-      if (m % 2 == 0) return false;
-      if (m % 3 == 0) return false;
+      if( m % 2 == 0 ) return false;
+      if( m % 3 == 0 ) return false;
       
-      ull m0 = sqrt(m),
-          k = 1,
-          m2 = 6 * k;
+      ull k6;
           
-      // factors_to_check = (m0 * 1) / 6;
-      
-      while(m2 - 1 <= m0)  // divisible by 6*k +/- 1 ?
+      k_max = (sqrt(m) + 1) / 6;
+      for( k = 1; k <= k_max; k++ )  // divisible by 6*k +/- 1 ?
       {
-          if (m % (m2 - 1) == 0) return false;
-          if (m % (m2 + 1) == 0) return false;
-          k++;
-          m2 = 6 * k;        
+        k6 = 6 * k;
+        if( m % (k6 - 1) == 0 ) return false;
+        if( m % (k6 + 1) == 0 ) return false;      
       }
   
       return true;
@@ -81,62 +112,28 @@ struct PrimeClock
 
 
   // Increment the clock and test if this next number is prime
-  bool test_next()
+  bool check_next()
   {
-    current_n++;
-    if(is_prime(current_n))
+    m++;
+    if( is_prime() )
     {
-      if(current_n - last_prime == 2) prime_pairs_found++;
-      last_prime = current_n;
-      primes_found++;
+      found_prime();
       return true;
     }
     return false;
   }
-
-
   
-};
-
-const uint8_t max_decimal_digits = 20;  // log10(2^64 -1)
-char ull_buf[ max_decimal_digits + 1 ];  // Null terminated string 
-
-// Given an ULL integer turn it into a string
-// This actually manipulates the global buffer c and
-// returns a const pointer to it for the printing/displaying function   
-const char* printull(ull m)
-{
-  char *s = ull_buf + max_decimal_digits;
-  *s = '\0';  // Null terminated
-  for(int i = 0 ; i < max_decimal_digits ; i++)
+  void found_prime()
   {
-    s--;
-    *s = m ? (char) (m % 10 + 48) : 32;
-    // Convert remainder to ASCII for 0, 1, 2....
-    // unless m == 0 in which case print a blank
-    m /= 10;
+    last_prime_digits.set( m );
+    primes_found++;
+    if( m - last_prime == 2 ) twin_primes_found++;
+    if( last_prime_digits.is_palindrome() ) palindromic_primes_found++;
+    last_prime = m;
   }
-  return (const char*) ull_buf;  
-}
 
-
-/*
- * This graph keeps folding onto itself
- * We start out with an x range say 1 to 10, each carrying a y value
- * As we go along x, we fill in the y-values
- * When we get to 11 (go past the range) we fold the graph by half:
- *   We take each adjacent bin, add the values and fold them into the left half of the range
- *   The upper half of the bins are now empty. We then consider the graph to represent double
- *   the range as before. We continue indefinitely as more x-values are added 
- */
-const uint8_t graph_bins = 20;
-struct FoldingGraph
-{
-  ull primes[ graph_bins ];
 };
 
-
 }
-
 
 #endif // _PRIMES_H_
