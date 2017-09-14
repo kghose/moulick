@@ -59,16 +59,16 @@ struct Digits
   
   const char* digits() { return (const char*) ull_buf; }  
 
-  char first_digit()
+  int first_digit()
   {
     unsigned char i = 0;
     while( ull_buf[i] == 32 ) i++;
-    return ull_buf[i];
+    return ull_buf[i] - 48;
   }
 
-  char last_digit()
+  int last_digit()
   {
-    return ull_buf[ ull_digits - 1 ];
+    return ull_buf[ ull_digits - 1 ] - 48;
   }
 
 };
@@ -82,7 +82,10 @@ struct PrimeClock
       last_prime, 
       primes_found,
       twin_primes_found,
-      palindromic_primes_found;
+      palindromic_primes_found,
+      first_digit_hist[ 10 ],  // can't use floats/doubles because of precision issues
+      last_digit_hist[ 10 ];
+      
   
   Digits last_prime_digits;
 
@@ -94,6 +97,11 @@ struct PrimeClock
     primes_found = 0;
     twin_primes_found = 0;
     palindromic_primes_found = 0;
+    for( int i = 0; i < 10; i++ )
+    {
+      first_digit_hist[ i ] = 0;
+      last_digit_hist[ i ] = 0;
+    }
   }
 
   // https://en.wikipedia.org/wiki/Primality_test
@@ -137,11 +145,14 @@ struct PrimeClock
   
   void found_prime()
   {
-    last_prime_digits.set( m );
     primes_found++;
     if( m - last_prime == 2 ) twin_primes_found++;
-    if( last_prime_digits.is_palindrome() ) palindromic_primes_found++;
     last_prime = m;
+    
+    last_prime_digits.set( m );    
+    if( last_prime_digits.is_palindrome() ) palindromic_primes_found++;
+    first_digit_hist[ last_prime_digits.first_digit() ]++;
+    last_digit_hist[ last_prime_digits.last_digit() ]++;    
   }
 
 };

@@ -17,15 +17,15 @@ void test_digits()
     assert( D.digits()[19] == '4' );
     assert( D.digits()[16] == '1' );
     assert( D.is_palindrome() == false); 
-    assert( D.first_digit() == '1');
-    assert( D.last_digit() == '4');
+    assert( D.first_digit() == 1);
+    assert( D.last_digit() == 4);
     
     D.set( 12344321 );
     assert( D.digits()[19] == '1' );
     assert( D.digits()[15] == '4' );
     assert( D.is_palindrome() == true); 
-    assert( D.first_digit() == '1');
-    assert( D.last_digit() == '1');
+    assert( D.first_digit() == 1);
+    assert( D.last_digit() == 1);
 
     D.set( 12321 );
     assert( D.is_palindrome() == true); 
@@ -65,7 +65,7 @@ void test_primes()
     }
     assert( son_of_pc.twin_primes_found == n_twin_primes );
     assert( son_of_pc.palindromic_primes_found == n_palindromes );
-    
+
     std::cout << "Primes test passed" << std::endl;
 }
 
