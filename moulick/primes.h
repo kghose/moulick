@@ -92,7 +92,8 @@ struct PrimeClock
   PrimeClock()
   {
     m = 1;
-    k_max = 0;
+    k = 0;
+    k_max = 1;
     last_prime = 1;
     primes_found = 0;
     twin_primes_found = 0;
