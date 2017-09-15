@@ -28,6 +28,12 @@ struct Digits
 {
   char ull_buf[ ull_digits + 1 ];  // Null terminated string 
 
+  Digits( const Digits &d )
+  {
+    for(int i = 0 ; i < ull_digits + 1; i++)
+      ull_buf[ i ] = d.ull_buf[ i ];
+  }
+  
   void set( ull m )
   {
     char *s = ull_buf + ull_digits;
