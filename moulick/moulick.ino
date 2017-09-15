@@ -48,6 +48,10 @@ void setup()
   
   prime_display.draw_fixtures();
 
+  // JUST FOR TESTING
+  prime_display.pc.m = 1000000;
+
+
   display::initialize_timer1(20);  // 20 Hz heartbeat do this last
 }
 
@@ -61,5 +65,10 @@ void loop()
 ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
 {
   prime_display.heartbeat();
+  /*
+  Serial.println( (uint32_t) prime_display.pc.m );
+  Serial.println( (uint32_t) prime_display.pc.k );
+  Serial.println( (uint32_t) prime_display.pc.k_max );
+  */
 }
 

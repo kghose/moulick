@@ -87,18 +87,16 @@ void initialize_display()
   tft.begin( TFT_ID );
   tft.setRotation(1);  // Landscape, with the Uno's USB port  to the right
   tft.fillScreen(BACKGROUND);
-//  tft.setTextSize(6);
-//  tft.setCursor(10, 10);
-//  tft.setTextColor(WHITE);
-//  tft.print("MOULICK");
 }
+
+
+// Display components
 
 #define DIAL_X 100
 #define DIAL_Y 120
 #define DIAL_R 100
 #define DIAL_COL YELLOW
 
-// Display components
 struct Dial
 {
   float last_f;
@@ -119,11 +117,47 @@ struct Dial
 };
 
 
+struct Odo
+{
+  Digits last_odo;
+  int16_t x, y, font_size;
+  uint16_t color;
+
+  void letters( const char* d, uint16_t color)
+  {
+    // x - ull_digits * 3 * font_size, y - 4 * font_size
+    char _d[ ull_digits + 1];
+    for(int i = 0, j = 0; i < ull_digits + 1; i++)
+      if( d[ i ] != 32 )
+        _d[ j++ ] = d[ i ];
+    
+    tft.setCursor(x, y);
+    tft.setTextSize( font_size );
+    tft.setTextColor( color );  
+    tft.print( _d );    
+  }
+  void draw(Digits &d)
+  {
+    letters( last_odo.digits(), BACKGROUND );
+    last_odo.set( d );
+    letters( last_odo.digits(), WHITE );
+  }
+};
+
+
 // Come together to form a display
 struct Display
 {
   PrimeClock pc;
   Dial dial;
+  Odo last_prime;
+
+  Display()
+  {
+    last_prime.x = 50;
+    last_prime.y = 110;
+    last_prime.font_size = 2;
+  }
 
   // Things like the circular clock and the histograms
   void draw_fixtures()
@@ -139,7 +173,11 @@ struct Display
   void update()
   {
     if( pc.check_next() )
-      Serial.println( pc.last_prime_digits.digits() );
+    {
+      noInterrupts();
+      last_prime.draw( pc.last_prime_digits );
+      interrupts();            
+    }
   }
 
   /*
@@ -151,7 +189,7 @@ struct Display
   */
   void heartbeat()
   {
-    dial.draw( (float)pc.k / (float)pc.k_max );
+    dial.draw( (float) pc.k / (float) pc.k_max );
   }
 
 };

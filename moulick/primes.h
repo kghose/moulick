@@ -28,12 +28,19 @@ struct Digits
 {
   char ull_buf[ ull_digits + 1 ];  // Null terminated string 
 
+  Digits() { ; }
   Digits( const Digits &d )
   {
     for(int i = 0 ; i < ull_digits + 1; i++)
       ull_buf[ i ] = d.ull_buf[ i ];
   }
-  
+
+  void set( const Digits &d )
+  {
+    for(int i = 0 ; i < ull_digits + 1; i++)
+      ull_buf[ i ] = d.ull_buf[ i ];
+  }
+
   void set( ull m )
   {
     char *s = ull_buf + ull_digits;
@@ -131,7 +138,8 @@ struct PrimeClock
       {
         k6 = 6 * k;
         if( m % (k6 - 1) == 0 ) return false;
-        if( m % (k6 + 1) == 0 ) return false;      
+        if( m % (k6 + 1) == 0 ) return false;
+        delay(0); // Makes it more dramatic      
       }
   
       return true;
