@@ -1,16 +1,31 @@
 /*
-  Main file for Moulick - a mathematical toy that uses an Aurdino to
-  continually compute primes and display them along with some fun
-  statistics.
+  Moulick is a mathematical toy that uses an Aurdino to continually compute primes 
+  and display them along with some fun statistics.
   
-  Primes are tested using simple division. The current number being
-  tested is displayed along with the last prime found. 
-  A circular indicator shows testing progress for the current number. 
-  Also shown are counts for how many primes have been found, how many twin primes and how many 
-  palindromes. Two histograms show the frequency of the first and last digits.
+  Display
+  -------
+  The display consists of a clock screen and a stats screen. 
+  We can switch between them by tapping on the display.
+  
+  The clock screen shows the most recently found prime at the center 
+  with a radial chart surrounding it. The radial chart shows the fraction 
+  of divisors that had to be tested for each of the last 999 numbers. 
+  Primes are marked in red and show up as the longest bars (= 1.0) while
+  non-primes are marked in white. Even numbers show up as the  
+  Fun to see are non-primes which also had to be tested  extensively, 
+  such as squares of primes. Even numbers show up flat (0) on this display.
+
+  The stats screen shows:
+  
+  1. Total numbers checked
+  2. Primes found + fraction
+  3. Twin primes found + fraction
+  4. Palindromes found + fraction
+  5. Histograms of the first and last digit frequencies
   
 
   Code organization
+  -----------------
 
   moulick.ino - the main "sketch"
   primes.h - code for computing primality
@@ -49,7 +64,7 @@ void setup()
   prime_display.draw_fixtures();
 
   // JUST FOR TESTING
-  prime_display.pc.m = 1000000;
+  // prime_display.pc.m = 1000000;
 
 
   display::initialize_timer1(20);  // 20 Hz heartbeat do this last
@@ -65,10 +80,5 @@ void loop()
 ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
 {
   prime_display.heartbeat();
-  /*
-  Serial.println( (uint32_t) prime_display.pc.m );
-  Serial.println( (uint32_t) prime_display.pc.k );
-  Serial.println( (uint32_t) prime_display.pc.k_max );
-  */
 }
 

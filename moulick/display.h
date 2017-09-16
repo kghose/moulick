@@ -27,6 +27,7 @@ namespace display {
 // Assign human-readable names to some common 16-bit color values:
 #define BLACK   0x0000
 #define BLUE    0x001F
+#define LTBLUE  0b1000010000011111
 #define RED     0xF800
 #define GREEN   0x07E0
 #define CYAN    0x07FF
@@ -90,58 +91,107 @@ void initialize_display()
 }
 
 
+// Positions of display components
+
+// The yellow circle round the prime digits and forming
+// the base of the radial chart
+#define CHART_X 320 / 2
+#define CHART_Y 240 / 2
+#define CHART_BASE_R0 75
+#define CHART_BASE_R1 77
+#define CHART_BASE_COL CYAN
+
+// Radial chart extents
+#define CHART_R0 80
+#define CHART_DR 38
+#define CHART_LINE_COL GREEN
+#define CHART_PRIME_COL RED
+
+#define CHART_N 250
+
 // Display components
 
-#define DIAL_X 100
-#define DIAL_Y 120
-#define DIAL_R 100
-#define DIAL_COL YELLOW
-
-struct Dial
+struct RadialChart
 {
-  float last_f;
-  void draw_fixture() { tft.drawCircle( DIAL_X, DIAL_Y, DIAL_R, DIAL_COL ); }
-  void bead(float f, uint16_t color)
-  {
-    int x = DIAL_X + (DIAL_R - 7) * sin( 2 * M_PI * f),
-        y = DIAL_Y - (DIAL_R - 7) * cos( 2 * M_PI * f);
-    tft.drawCircle( x, y, 5, color );
-    
+  void draw_fixture() 
+  { 
+    for(int r = CHART_BASE_R0; r <= CHART_BASE_R1; r++)
+      tft.drawCircle( CHART_X, CHART_Y, r, CHART_BASE_COL ); 
   }
-  void draw(float f)
+
+  void radial_line( uint16_t n, float f, uint16_t color )
   {
-    bead(last_f, BACKGROUND );
-    bead(f, BLUE );
-    last_f = f;
+    float theta = 2 * M_PI * (float)(n % CHART_N) / (float) CHART_N,
+          st = sin( theta ), 
+          ct = cos( theta );
+    int x0 = CHART_X + CHART_R0 * st,
+        y0 = CHART_Y - CHART_R0 * ct,
+        x1 = CHART_X + ( CHART_R0 + CHART_DR * f ) * st,
+        y1 = CHART_Y - ( CHART_R0 + CHART_DR * f ) * ct;
+    tft.drawLine( x0, y0, x1, y1, color );
   }
+
+  void draw(ull m, float f, bool is_prime = false)
+  {
+    for( int i = 0; i <= 10 ; i++)
+      radial_line(m, (float) i / 10.0, BACKGROUND ); 
+      // Erase lines ahead to give a nice advancing blank border
+    radial_line(m, f, is_prime ? CHART_PRIME_COL : CHART_LINE_COL );
+  }
+
 };
 
 
+// This takes care of displaying a series of digits
+enum class Alignment{Left=0, Right, Center};
+
 struct Odo
 {
-  Digits last_odo;
-  int16_t x, y, font_size;
+  // It's faster to print the last string in BG color than to print a
+  // whole rectangle in BG color in order to erase the previous display
+  char last_odo[ ull_digits ]; 
+  int16_t x, y;
   uint16_t color;
+  byte font_size;
+  Alignment alignment;
 
-  void letters( const char* d, uint16_t color)
+  void set(int16_t _x, int16_t _y, byte _font_size, uint16_t _color, Alignment al)
+  { 
+    x = _x; y = _y; font_size = _font_size; color = _color; alignment = al;
+    last_odo[ 0 ] = '\0';
+  }
+  
+  void draw_string( const char* d, uint16_t col )
   {
-    // x - ull_digits * 3 * font_size, y - 4 * font_size
-    char _d[ ull_digits + 1];
-    for(int i = 0, j = 0; i < ull_digits + 1; i++)
-      if( d[ i ] != 32 )
-        _d[ j++ ] = d[ i ];
-    
-    tft.setCursor(x, y);
+    int16_t _x;
+    switch( alignment )
+    {
+      case Alignment::Left:    
+                    _x = x; 
+                    break;
+      case Alignment::Right:  
+                     _x = x - (ull_digits - strlen( d )) * 6 * font_size;
+                    break;
+      case Alignment::Center:
+                    _x = x - strlen( d ) * 3 * font_size;
+                    break;
+    }
+        
+    tft.setCursor(_x, y);
     tft.setTextSize( font_size );
-    tft.setTextColor( color );  
-    tft.print( _d );    
+    tft.setTextColor( col );  
+    tft.print( d );    
   }
-  void draw(Digits &d)
+  
+  void draw(const char *d)
   {
-    letters( last_odo.digits(), BACKGROUND );
-    last_odo.set( d );
-    letters( last_odo.digits(), WHITE );
+    draw_string( last_odo, BACKGROUND );
+    for( int i = 0, j = 0; i <= ull_digits; i++ )
+      if( d[ i ] != 32)
+        last_odo[ j++ ] = d[ i ];
+    draw_string( last_odo, color );
   }
+
 };
 
 
@@ -149,20 +199,18 @@ struct Odo
 struct Display
 {
   PrimeClock pc;
-  Dial dial;
+  RadialChart radial_chart;
   Odo last_prime;
 
   Display()
   {
-    last_prime.x = 50;
-    last_prime.y = 110;
-    last_prime.font_size = 2;
+    last_prime.set( CHART_X, CHART_Y - 5, 2, WHITE, Alignment::Center );
   }
 
-  // Things like the circular clock and the histograms
+  // Draw any fixed background objects
   void draw_fixtures()
   {
-    dial.draw_fixture();
+    radial_chart.draw_fixture();
   }
 
 
@@ -172,12 +220,15 @@ struct Display
   */
   void update()
   {
-    if( pc.check_next() )
+    noInterrupts();
+    // We may get glitches if we don't stop the background drawing routine
+    bool is_prime = pc.check_next();
+    radial_chart.draw( pc.m, min(((float) pc.k - 1) / (float) pc.k_max, 1.0), is_prime );
+    if( is_prime )
     {
-      noInterrupts();
-      last_prime.draw( pc.last_prime_digits );
-      interrupts();            
+      last_prime.draw( pc.last_prime_digits.digits() );
     }
+    interrupts();                
   }
 
   /*
@@ -189,47 +240,10 @@ struct Display
   */
   void heartbeat()
   {
-    dial.draw( (float) pc.k / (float) pc.k_max );
+    // dial.draw( (float) pc.k / (float) pc.k_max );
   }
 
 };
-
-
-/*
-// Represents a numeric display
-struct Numeric
-{
-  int x, y, font_size, font_color;
-  char current_digits[ ull_digits + 1 ];  // We are currently displaying this
-  char new_digits[ ull_digits + 1 ];      // We need to display this next
-
-  virtual void draw() = 0;
-
-  // Update with new digits
-  void update(char digits[])
-  {
-    copy(new_digits, digits, ull_digits + 1);
-    draw();
-    copy(current_digits, digits, ull_digits + 1);    
-  }
-};
-
-
-struct Histogram
-
-
-
-
-struct Display
-{
-  Display() {;}
-  void display(const PrimeClock &pc, bool pf)
-  {
-    ;
-  }
-};
-
-*/
 
 } // display
 

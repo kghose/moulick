@@ -126,6 +126,9 @@ struct PrimeClock
   // (e.g. via an interrupt)
   bool is_prime()
   {
+      k = 1;
+      k_max = 1;
+      
       if( m == 2 | m == 3 ) return true;
   
       if( m % 2 == 0 ) return false;
@@ -138,8 +141,7 @@ struct PrimeClock
       {
         k6 = 6 * k;
         if( m % (k6 - 1) == 0 ) return false;
-        if( m % (k6 + 1) == 0 ) return false;
-        delay(0); // Makes it more dramatic      
+        if( m % (k6 + 1) == 0 ) return false;      
       }
   
       return true;
