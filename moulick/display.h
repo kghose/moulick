@@ -170,7 +170,7 @@ struct Odo
                     _x = x; 
                     break;
       case Alignment::Right:  
-                     _x = x - (ull_digits - strlen( d )) * 6 * font_size;
+                     _x = x - strlen( d ) * 6 * font_size;
                     break;
       case Alignment::Center:
                     _x = x - strlen( d ) * 3 * font_size;
