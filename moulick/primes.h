@@ -1,178 +1,220 @@
 /*
-  This contains code that handles the generation of primes
-  and some abstractions required for their display and metrics
+  Handles the generation of primes and tracks some metrics
 */
 #ifndef _PRIMES_H_
 #define _PRIMES_H_
 
 namespace primes {
-  
-typedef unsigned long long ull;
 
+  /*
+    I debated whether to make this uint32_t (which takes us to four billion)
+    or uint64_t (which take us to eighteen quintillion).
+    
+    Rough measurements show the hardware I used (Uno + TFT display) tests 250
+    numbers in 9s (or ~ 1600 numbers a minuite). This was when testing numbers
+    below one million, and is expected to get slower as we go to larger numbers.
+    
+    Conservatively, four billion primes would take more than 5 years to 
+    compute sequentially and eighteen quintillion would take a tad longer.
 
-// Good enough code for finding the square root of m
-// We only need to check divisors up to this
-ull sqrt(ull m)
-{
-    float sqrt_m = m;
-    for( int i = 0; i < 6; i++ )
-        sqrt_m = (sqrt_m * sqrt_m + m) / (2 * sqrt_m);
-    return (ull) sqrt_m;
-}
+    I went through a period of mania where I imagined Moulick becoming a cult
+    phenomenon and being buried in a time capsule with a magic battery being
+    dug up by the descendants of man, still ticking. Then I decided to stick
+    with uint32_t. If you want, though, you can uncomment the relevant lines
+    though ...
 
+    Also, we can start the clock anywhere ...  
 
-const unsigned char ull_digits = 20;  // log10(2^64 -1)
+    Interestingly, I did not measure any difference in performance between using
+    uint32_t and uint64_t, which was strange. This being a 8 bit microcontroller
+    uint64_t should take twice as long as uint32_t computations. 
+  */
+  // typedef unsigned long long prime_t;  // prime number type
+  // const unsigned char p_max_d = 20;  // log10(2^64 -1)
+  typedef uint32_t prime_t;  // prime number type
+  const unsigned char p_max_d = 10;  // log10(2^32 -1)
 
-// Convert an ull to a string
-struct Digits
-{
-  char ull_buf[ ull_digits + 1 ];  // Null terminated string 
-
-  Digits() { ; }
-  Digits( const Digits &d )
+  // Good enough code for finding the square root of m
+  // We only need to check divisors up to this
+  prime_t sqrt( prime_t m )
   {
-    for(int i = 0 ; i < ull_digits + 1; i++)
-      ull_buf[ i ] = d.ull_buf[ i ];
+      float sqrt_m = m;
+      for( int i = 0; i < 6; i++ )
+          sqrt_m = (sqrt_m * sqrt_m + m) / (2 * sqrt_m);
+      return (prime_t) sqrt_m;
   }
 
-  void set( const Digits &d )
+  /*
+    buf should have size p_max_d + 1
+    Some or all of buf will be over-written
+    String will be terminated by null '\0'
+  */
+  char* to_string( prime_t m, char *buf )
   {
-    for(int i = 0 ; i < ull_digits + 1; i++)
-      ull_buf[ i ] = d.ull_buf[ i ];
-  }
-
-  void set( ull m )
-  {
-    char *s = ull_buf + ull_digits;
-    *s = '\0';  // Null terminated
-    for(int i = 0 ; i < ull_digits ; i++)
+    char tmp_buf[ p_max_d ];
+    char *s = tmp_buf + p_max_d - 1;
+    
+    // First convert 'm' into a string
+    // This is right justified
+    for(int i = 0 ; i < p_max_d ; i++)
     {
       s--;
-      *s = m ? (char) (m % 10 + 48) : 32;
-      // Convert remainder to ASCII for 0, 1, 2....
-      // unless m == 0 in which case print a blank
-      m /= 10;
+      if( m ) {
+        *s = (char) (m % 10 + 48);  // Convert remainder to ASCII for 0, 1, 2....
+        m /= 10;        
+      } else {
+        *s = 32; // unless m == 0 in which case print a blank
+      }
     }
+
+    // Now copy the string onto buf but left justified
+    int i = 0, j = 0;
+    for( ; i <= p_max_d; i++ )
+    if( tmp_buf[ i ] != 32)
+      buf[ j++ ] = tmp_buf[ i ];
+      buf[ j ] = '\0';
+    
+    return buf;
   }
 
-  bool is_palindrome()
+
+  // Given a string, check if it is a palindrome
+  bool is_palindrome( const char *buf )
   {
-    unsigned char i = 0, j, k;
-    while( ull_buf[i] == 32 ) i++;
-    if( i == ull_digits ) return false;  // Blank
-    for( j = i, k = ull_digits - 1 ;; )
+    for( int i = 0, j = strlen(buf) - 1; i < strlen(buf); i++, j--)
     {
-      if( ull_buf[j] != ull_buf[k] ) return false;
-      if( (j == k) || (j + 1 == k) ) break;
-      j++;
-      k--;
+      if( buf[i] != buf[j] ) return false;
+      if( (i == j) || (i + 1 == j) ) break;
     }
     return true;
   }
-  
-  const char* digits() { return (const char*) ull_buf; }  
 
-  int first_digit()
+  int first_digit( const char *buf )
   {
-    unsigned char i = 0;
-    while( ull_buf[i] == 32 ) i++;
-    return ull_buf[i] - 48;
+    return buf[ 0 ] - 48;
   }
 
-  int last_digit()
+  int last_digit( const char *buf )
   {
-    return ull_buf[ ull_digits - 1 ] - 48;
+    return buf[ strlen( buf ) - 1 ] - 48;
   }
 
-};
 
-
-struct PrimeClock
-{
-  ull m,      // current number being tested,
-      k_max,  // factors_to_check,
-      k,      // factors_checked,
-      last_prime, 
-      primes_found,
-      twin_primes_found,
-      palindromic_primes_found,
-      first_digit_hist[ 10 ],  // can't use floats/doubles because of precision issues
-      last_digit_hist[ 10 ];
-      
-  
-  Digits last_prime_digits;
-
-  PrimeClock()
+  /*
+    We structure the prime tester as a struct and expose
+    some internal variables so that we can interrupt it's 
+    operation and peek into how many factors have been
+    tested if we so wish
+  */
+  struct PrimeTester
   {
-    m = 1;
-    k = 0;
-    k_max = 1;
-    last_prime = 1;
-    primes_found = 0;
-    twin_primes_found = 0;
-    palindromic_primes_found = 0;
-    for( int i = 0; i < 10; i++ )
+    prime_t k_max,  // number of factors to check in total
+            k;      // number of factors already checked
+
+    PrimeTester() { k = 0; k_max = 1; }
+
+    // https://en.wikipedia.org/wiki/Primality_test
+    // Implemented as a member function so that we can set the
+    // number of factors to check, and current factor as member
+    // variables. This allows us to show the internal progress
+    // of the prime test if we pause the function 
+    // (e.g. via an interrupt)
+    bool is_prime( prime_t m )
     {
-      first_digit_hist[ i ] = 0;
-      last_digit_hist[ i ] = 0;
-    }
-  }
-
-  // https://en.wikipedia.org/wiki/Primality_test
-  // Implemented as a member function so that we can set the
-  // number of factors to check, and current factor as member
-  // variables. This allows us to show the internal progress
-  // of the prime test if we pause the function 
-  // (e.g. via an interrupt)
-  bool is_prime()
-  {
-      k = 1;
-      k_max = 1;
-      
-      if( m == 2 | m == 3 ) return true;
-  
-      if( m % 2 == 0 ) return false;
-      if( m % 3 == 0 ) return false;
-      
-      ull k6;
-          
-      k_max = (sqrt(m) + 1) / 6;
-      for( k = 1; k <= k_max; k++ )  // divisible by 6*k +/- 1 ?
-      {
-        k6 = 6 * k;
-        if( m % (k6 - 1) == 0 ) return false;
-        if( m % (k6 + 1) == 0 ) return false;      
-      }
-  
-      return true;
-  }
-
-
-  // Increment the clock and test if this next number is prime
-  bool check_next()
-  {
-    m++;
-    if( is_prime() )
-    {
-      found_prime();
-      return true;
-    }
-    return false;
-  }
-  
-  void found_prime()
-  {
-    primes_found++;
-    if( m - last_prime == 2 ) twin_primes_found++;
-    last_prime = m;
+        k = 1;
+        k_max = 1;
+        
+        if( m == 2 | m == 3 ) return true;
     
-    last_prime_digits.set( m );    
-    if( last_prime_digits.is_palindrome() ) palindromic_primes_found++;
-    first_digit_hist[ last_prime_digits.first_digit() ]++;
-    last_digit_hist[ last_prime_digits.last_digit() ]++;    
-  }
+        if( m % 2 == 0 ) return false;
+        if( m % 3 == 0 ) return false;
+        
+        prime_t k6;
+            
+        k_max = (sqrt(m) + 1) / 6;
+        for( k = 1; k <= k_max; k++ )  // divisible by 6*k +/- 1 ?
+        {
+          k6 = 6 * k;
+          if( m % (k6 - 1) == 0 ) return false;
+          if( m % (k6 + 1) == 0 ) return false;      
+        }
+    
+        return true;
+    }
+  };
 
-};
+  struct PrimeClock
+  {
+    prime_t m,            // current number being tested,
+            last_prime,   // most recent prime found
+            primes_found, 
+            twin_primes_found,
+            palindromic_primes_found,
+            first_digit_hist[ 9 ],  // can't use floats/doubles because of precision issues
+            last_digit_hist[ 9 ];         
+    PrimeTester pt;
+    char *m_string;  // m as a string
+    bool is_prime, is_twin_prime, is_palindromic_prime;
+
+    PrimeClock()
+    {
+      m_string = new char[ p_max_d + 1 ];
+      m = 1;
+      last_prime = 1;
+      primes_found = 0;
+      twin_primes_found = 0;
+      palindromic_primes_found = 0;
+      for( int i = 0; i < 9; i++ )
+      {
+        first_digit_hist[ i ] = 0;
+        last_digit_hist[ i ] = 0;
+      }
+    }
+
+    ~PrimeClock()
+    {
+      delete[] m_string;  // Because we are neat
+    }
+
+    // Increment the clock and test if this next number is prime
+    void check_next()
+    {
+      m++;
+      if( pt.is_prime( m ) )
+      {
+        is_prime = true;
+        primes_found++;
+
+        // Test twin primes
+        if( m - last_prime == 2 )
+        {
+          twin_primes_found++;
+          is_twin_prime = true;        
+        } else {
+          is_twin_prime = false;
+        }
+        last_prime = m;
+
+
+        m_string = to_string( m, m_string );        
+        // Test palindrome
+        if( is_palindrome( m_string ) )
+        {
+          palindromic_primes_found++;
+          is_palindromic_prime = true;          
+        } else {
+          is_palindromic_prime = false;           
+        }
+        
+        // Update histograms
+        first_digit_hist[ first_digit( m_string ) - 1 ]++;
+        last_digit_hist [ last_digit(  m_string ) - 1 ]++;    
+      }
+      else
+        is_prime = false;  // The other flags don't matter then
+    }
+
+  };
 
 }
 
