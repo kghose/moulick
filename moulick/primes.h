@@ -36,7 +36,7 @@ namespace primes {
 
   // Good enough code for finding the square root of m
   // We only need to check divisors up to this
-  prime_t sqrt( prime_t m )
+  inline prime_t sqrt( prime_t m )
   {
       float sqrt_m = m;
       for( int i = 0; i < 6; i++ )
@@ -49,7 +49,7 @@ namespace primes {
     Some or all of buf will be over-written
     String will be terminated by null '\0'
   */
-  char* to_string( prime_t m, char *buf )
+  inline char* to_string( prime_t m, char *buf )
   {
     char tmp_buf[ p_max_d ];
     char *s = tmp_buf + p_max_d - 1;
@@ -79,7 +79,7 @@ namespace primes {
 
 
   // Given a string, check if it is a palindrome
-  bool is_palindrome( const char *buf )
+  inline bool is_palindrome( const char *buf )
   {
     for( int i = 0, j = strlen(buf) - 1; i < strlen(buf); i++, j--)
     {
@@ -89,12 +89,12 @@ namespace primes {
     return true;
   }
 
-  int first_digit( const char *buf )
+  inline int first_digit( const char *buf )
   {
     return buf[ 0 ] - 48;
   }
 
-  int last_digit( const char *buf )
+  inline int last_digit( const char *buf )
   {
     return buf[ strlen( buf ) - 1 ] - 48;
   }
@@ -214,6 +214,16 @@ namespace primes {
         is_prime = false;  // The other flags don't matter then
     }
 
+    // What fraction of the divisors have been tested?
+    float fraction_tested() const
+    {
+      return ((float) pt.k - 1) / (float) pt.k_max;
+    }
+
+    const char *m_as_string() const
+    {
+      return (const char*) m_string;
+    }
   };
 
 }
