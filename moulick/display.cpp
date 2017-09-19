@@ -1,15 +1,5 @@
 /*
-  Supplies code to translate the PrimeClock structure into a visual display
-
-  The Display struct contai
-  into a visual display description. The code maintains state for each of the 
-  components and indicates if a component needs updating (drawing). This description
-  is hardware independent but contains virtual functions that can be overridden in
-  a derived class that implements hardware dependent code that actually draws on
-  a display.
-
-  The function draw() should be over-ridden for each component. The function update()
-  if called whenever a component needs updating and this calls draw()
+  Translates the PrimeClock structure into a visual display
 */
 #include "display.h"
 
@@ -33,10 +23,13 @@ namespace display {
       case PRIME: 
         color = CHART_PRIME_COL;
         break;
-      case PRIME_TWIN: 
+      case TWIN: 
         color = CHART_TWIN_PRIME_COL;
         break;
-      case PRIME_TWIN_PALINDROME: 
+      case PALINDROME: 
+        color = CHART_PALINDROMIC_PRIME_COL;
+        break;        
+      case TWIN & PALINDROME: 
         color = CHART_TWIN_AND_PALINDROMIC_PRIME_COL;
         break;
     }
@@ -139,10 +132,10 @@ namespace display {
   
   void Clock::draw()
   {
-    byte m_type = NONPRIME;
-    if( pc->is_prime ) m_type |= PRIME;
-    if( pc->is_twin_prime ) m_type |= TWIN;
-    if( pc->is_palindromic_prime ) m_type |= PALINDROME; 
+    byte m_type = COMPOSITE;
+    if( pc->is_prime ) m_type = PRIME;
+    if( pc->is_twin_prime ) m_type &= TWIN;
+    if( pc->is_palindromic_prime ) m_type &= PALINDROME; 
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
 
     if( pc->is_prime ) digit_display.draw( pc->m_as_string() );
@@ -160,7 +153,7 @@ namespace display {
       // function is called again with this same m, we want to refresh
       return;      
     }
-    byte m_type = NONPRIME;
+    byte m_type = COMPOSITE;  // We don't know what it is yet
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
   }
 

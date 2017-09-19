@@ -43,14 +43,12 @@ namespace display {
 
   using namespace primes;
 
-  #define NONPRIME    0b00000000
-  #define PRIME       0b00000001
-  #define TWIN        0b00000010
-  #define PALINDROME  0b00000100
+  // The values are designed so that we can meaningfully AND them
+  #define COMPOSITE   0b000
+  #define PRIME       0b111
+  #define TWIN        0b101
+  #define PALINDROME  0b110
 
-  #define PRIME_TWIN             ( PRIME | TWIN )
-  #define PRIME_TWIN_PALINDROME  ( PRIME | TWIN | PALINDROME )
-  
   struct RadialChart
   {
     Elegoo_TFTLCD *tft;              // This is the pysical display    
