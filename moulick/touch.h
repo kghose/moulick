@@ -23,7 +23,7 @@ namespace touchscreen
   };
 
 
-  TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
+  TouchScreen ts = TouchScreen( XP, YP, XM, YM, TS_OHMS );
 
   struct TouchScreen
   {

@@ -146,6 +146,22 @@ namespace display {
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
 
     if( pc->is_prime ) digit_display.draw( pc->m_as_string() );
+  
+    m_at_last_draw = pc->m;
+  }
+
+  void Clock::partial_draw()
+  {
+    // We only refresh this display if we are stuck on the same prime
+    if ( m_at_last_draw != pc->m ) 
+    {
+      m_at_last_draw = pc->m; 
+      // We've moved to a new m. We want to remember this, because if the 
+      // function is called again with this same m, we want to refresh
+      return;      
+    }
+    byte m_type = NONPRIME;
+    radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
   }
 
 
@@ -180,7 +196,7 @@ namespace display {
     }
   }
 
-  void MoulickApp::update()
+  void MoulickApp::next_tick()
   {
     pc->check_next();
         
@@ -197,6 +213,23 @@ namespace display {
         break;
     }
     interrupts();
+  }
+
+  // We call this periodically (say using an interrupt) to animate the
+  // display when prime testing is taking long and the display would
+  // otherwise look frozen
+  void MoulickApp::refresh_display()
+  {
+    switch( screen_to_display )
+    {
+      case Screen::Corona:
+        corona_disp.partial_draw();
+        break;
+
+      case Screen::Stats:
+        // There is no partial refresh for stats screen
+        break;
+    }
   }
 
   void MoulickApp::set_new_m( prime_t m)

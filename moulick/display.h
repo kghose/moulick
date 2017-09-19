@@ -88,8 +88,12 @@ namespace display {
     RadialChart radial_chart;
     DigitDisplay digit_display;
 
+    prime_t m_at_last_draw;  
+    // Used to determine if a partial_draw should be executed
+
     void init( Elegoo_TFTLCD *_tft, PrimeClock *_pc );
     void draw();
+    void partial_draw();  // A partial update when prime testing is taking long
   };
 
 
@@ -132,7 +136,8 @@ namespace display {
     void init();
     void initialize_display();    
     void switch_to( Screen scr );    
-    void update();
+    void next_tick();
+    void refresh_display(); // A partial redraw when prime testing is taking long  
     void set_new_m( prime_t m);
   };
 

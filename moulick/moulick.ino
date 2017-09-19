@@ -7,7 +7,7 @@
 #include "touch.h"
 #include "display.h"
 
-#if 0
+
 void initialize_timer1(float refresh_rate = 20)
 {
   /*
@@ -35,11 +35,6 @@ void initialize_timer1(float refresh_rate = 20)
   interrupts();             // enable all interrupts
 }
 
-ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
-{
-  prime_display.heartbeat();
-}
-#endif
 
 //serialport::SerialPort si;
 display::MoulickApp moulick;
@@ -48,17 +43,26 @@ touchscreen::TouchScreen ts;
 void setup() 
 {
   // put your setup code here, to run once:
-  // serialport::init();
   Serial.begin(9600);
   moulick.init();
   ts.init();
 
-  // display::initialize_timer1(20);  // 20 Hz heartbeat do this last
+  initialize_timer1(250);  
+  // 250 Hz period for polling touch screen and redrawing screen for large
+  // primes. This is kept slow to reduce overhead, but maintain responsiveness
+  // Initialize this last
 }
 
 void loop() 
 {
   // put your main code here, to run repeatedly:
+  moulick.next_tick();
+}
+
+
+void poll()
+{
+  // poll the touch screen
   if( ts.poll() )
   {
     switch( ts.cmd_type )
@@ -73,7 +77,13 @@ void loop()
         break;
     }
   }  
-  moulick.update();
+
+  // do a partial display refresh (the App decides if this is needed)
+  moulick.refresh_display();
 }
 
 
+ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
+{
+  poll();
+}
