@@ -23,3 +23,22 @@ The following definitions are for the Elegoo TFT touch screen I used
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
+
+// Stuff for the touch screen
+
+#define YP A3  // must be an analog pin, use "An" notation!
+#define XM A2  // must be an analog pin, use "An" notation!
+#define YM 9   // can be a digital pin
+#define XP 8   // can be a digital pin
+
+#define MINPRESSURE 10
+#define MAXPRESSURE 1000
+
+//Touch For New ILI9341 TP
+#define TS_MINX 120
+#define TS_MAXX 900
+
+#define TS_MINY 70
+#define TS_MAXY 920
+
+#define TS_OHMS 300 

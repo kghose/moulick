@@ -4,7 +4,7 @@
   
   See the Readme file for details.
 */  
-#include "serial.h"
+#include "touch.h"
 #include "display.h"
 
 #if 0
@@ -41,14 +41,17 @@ ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
 }
 #endif
 
-serialport::SerialPort si;
+//serialport::SerialPort si;
 display::MoulickApp moulick;
+touchscreen::TouchScreen ts;
 
 void setup() 
 {
   // put your setup code here, to run once:
-  serialport::init();
+  // serialport::init();
+  Serial.begin(9600);
   moulick.init();
+  ts.init();
 
   // display::initialize_timer1(20);  // 20 Hz heartbeat do this last
 }
@@ -56,10 +59,19 @@ void setup()
 void loop() 
 {
   // put your main code here, to run repeatedly:
-  if( si.poll() )
+  if( ts.poll() )
   {
-    Serial.println( si.new_m );
-    moulick.set_new_m( si.new_m);
+    switch( ts.cmd_type )
+    {
+      case touchscreen::TouchCommandType::Set:
+        Serial.println( ts.new_m );
+        moulick.set_new_m( ts.new_m);
+        break;
+
+      case touchscreen::TouchCommandType::Switch:
+        // Not implemented
+        break;
+    }
   }  
   moulick.update();
 }
