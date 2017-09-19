@@ -44,40 +44,6 @@ namespace primes {
       return (prime_t) sqrt_m;
   }
 
-  /*
-    buf should have size p_max_d + 1
-    Some or all of buf will be over-written
-    String will be terminated by null '\0'
-  */
-  inline char* to_string( prime_t m, char *buf )
-  {
-    char tmp_buf[ p_max_d ];
-    char *s = tmp_buf + p_max_d - 1;
-    
-    // First convert 'm' into a string
-    // This is right justified
-    for(int i = 0 ; i < p_max_d ; i++)
-    {
-      s--;
-      if( m ) {
-        *s = (char) (m % 10 + 48);  // Convert remainder to ASCII for 0, 1, 2....
-        m /= 10;        
-      } else {
-        *s = 32; // unless m == 0 in which case print a blank
-      }
-    }
-
-    // Now copy the string onto buf but left justified
-    int i = 0, j = 0;
-    for( ; i <= p_max_d; i++ )
-    if( tmp_buf[ i ] != 32)
-      buf[ j++ ] = tmp_buf[ i ];
-      buf[ j ] = '\0';
-    
-    return buf;
-  }
-
-
   // Given a string, check if it is a palindrome
   inline bool is_palindrome( const char *buf )
   {
@@ -153,12 +119,13 @@ namespace primes {
             first_digit_hist[ 9 ],  // can't use floats/doubles because of precision issues
             last_digit_hist[ 9 ];         
     PrimeTester pt;
-    char *m_string;  // m as a string
+    char m_string[ p_max_d + 1 ];  // m as a string
+    char *m_ptr;  // pointer into m_string
     bool is_prime, is_twin_prime, is_palindromic_prime;
 
     PrimeClock()
     {
-      m_string = new char[ p_max_d + 1 ];
+      m_string[ p_max_d ] = '\0';
       m = 1;
       last_prime = 1;
       primes_found = 0;
@@ -171,9 +138,18 @@ namespace primes {
       }
     }
 
-    ~PrimeClock()
+    void set_string_representation()
     {
-      delete[] m_string;  // Because we are neat
+      prime_t _m = m;
+      m_ptr = m_string + p_max_d;
+      for(int i = 0 ; i < p_max_d ; i++)
+      {
+        m_ptr--;
+        *m_ptr = (char) (_m % 10 + 48);  // Convert remainder to ASCII for 0, 1, 2....
+        _m /= 10;
+        if( _m == 0) break;
+      }
+      // m_ptr now points to start of the converted number
     }
 
     // Increment the clock and test if this next number is prime
@@ -196,9 +172,9 @@ namespace primes {
         last_prime = m;
 
 
-        m_string = to_string( m, m_string );        
+        set_string_representation();        
         // Test palindrome
-        if( is_palindrome( m_string ) )
+        if( is_palindrome( m_ptr ) )
         {
           palindromic_primes_found++;
           is_palindromic_prime = true;          
@@ -222,7 +198,7 @@ namespace primes {
 
     const char *m_as_string() const
     {
-      return (const char*) m_string;
+      return (const char*) m_ptr;
     }
   };
 

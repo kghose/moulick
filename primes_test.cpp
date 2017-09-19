@@ -11,23 +11,29 @@ using namespace primes;
 
 void test_digits()
 {
-    char *buf = new char[ p_max_d + 1 ];
+    PrimeClock pc;
+    pc.m = 1234;
+    pc.set_string_representation();    
+    const char *buf = pc.m_as_string();
 
-    buf = to_string( 1234, buf );
-    assert( buf[ 3 ] == '4' );
     assert( buf[ 0 ] == '1' );
+    assert( buf[ 3 ] == '4' );
     assert( is_palindrome( buf ) == false); 
     assert( first_digit( buf ) == 1);
     assert( last_digit( buf ) == 4);
     
-    buf = to_string( 12344321, buf );
+    pc.m = 12344321;
+    pc.set_string_representation();
+    buf = pc.m_as_string();
     assert( buf[ 0 ] == '1' );
     assert( buf[ 7 ] == '1' );
     assert( is_palindrome( buf ) == true); 
     assert( first_digit( buf ) == 1);
     assert( last_digit( buf ) == 1);
 
-    buf = to_string( 12321, buf );
+    pc.m = 12321;
+    pc.set_string_representation();
+    buf = pc.m_as_string();
     assert( is_palindrome( buf ) == true); 
         
     std::cout << "Digits test passed" << std::endl;
