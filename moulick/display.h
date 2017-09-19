@@ -93,13 +93,21 @@ namespace display {
   };
 
 
+  struct Histogram
+  {
+    Elegoo_TFTLCD *tft;     // This is the pysical display
+    uint8_t values[ 9 ];    // What we currently display
+    void draw( const float *h ) { ; }    
+  };
+
   // The stats display 
   // TODO: This is a stub right now
   struct Stats
   {
     Elegoo_TFTLCD *tft;  
     PrimeClock const *pc;
-
+    DigitDisplay primes_found, twins_found, palindromes_found;
+    
     void init( Elegoo_TFTLCD *_tft, PrimeClock *_pc ) 
     { 
       tft = _tft;
@@ -114,7 +122,7 @@ namespace display {
   struct MoulickApp
   {
     Elegoo_TFTLCD *tft;  
-    PrimeClock const *pc;
+    PrimeClock *pc;
     
     Clock corona_disp;
     Stats stats_disp;
@@ -125,6 +133,7 @@ namespace display {
     void initialize_display();    
     void switch_to( Screen scr );    
     void update();
+    void set_new_m( prime_t m);
   };
 
 } // display

@@ -156,10 +156,9 @@ namespace primes {
     char *m_string;  // m as a string
     bool is_prime, is_twin_prime, is_palindromic_prime;
 
-    PrimeClock()
+    void restart_clock_from( prime_t _m )
     {
-      m_string = new char[ p_max_d + 1 ];
-      m = 1;
+      m = _m;
       last_prime = 1;
       primes_found = 0;
       twin_primes_found = 0;
@@ -169,6 +168,12 @@ namespace primes {
         first_digit_hist[ i ] = 0;
         last_digit_hist[ i ] = 0;
       }
+    }
+
+    PrimeClock()
+    {
+      m_string = new char[ p_max_d + 1 ];
+      restart_clock_from( 1 );
     }
 
     ~PrimeClock()

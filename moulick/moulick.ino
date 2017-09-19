@@ -1,9 +1,10 @@
 /*
   Moulick is a mathematical toy that uses an Arduino to continually compute 
-  and display primes numbers.
+  and display prime numbers.
   
   See the Readme file for details.
 */  
+#include "serial.h"
 #include "display.h"
 
 #if 0
@@ -40,20 +41,14 @@ ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
 }
 #endif
 
+serialport::SerialPort si;
 display::MoulickApp moulick;
 
 void setup() 
 {
   // put your setup code here, to run once:
-  Serial.begin(9600);
-  while( !Serial ) { ; }  // Wait for serial port to connect
-  Serial.println("Moulick - a prime number toy");
-  
+  serialport::init();
   moulick.init();
-
-  // JUST FOR TESTING
-  // prime_display.pc.m = 1000000;
-
 
   // display::initialize_timer1(20);  // 20 Hz heartbeat do this last
 }
@@ -61,15 +56,12 @@ void setup()
 void loop() 
 {
   // put your main code here, to run repeatedly:
-  moulick.update();
-
-  /*
-  // Check serial port for commands
-  if( Serial.available() )
+  if( si.poll() )
   {
-    Serial.print( Serial.readString() );
-  }
-  */
+    Serial.println( si.new_m );
+    moulick.set_new_m( si.new_m);
+  }  
+  moulick.update();
 }
 
 

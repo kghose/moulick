@@ -199,4 +199,10 @@ namespace display {
     interrupts();
   }
 
+  void MoulickApp::set_new_m( prime_t m)
+  {
+    pc->restart_clock_from( m );
+    switch_to( screen_to_display );
+  }
+
 } // display
