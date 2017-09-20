@@ -14,6 +14,8 @@
   The following constants determine the layout and color of the display
 */
 
+// Coronal display
+
 // The yellow circle round the prime digits that forms
 // the base of the radial chart
 #define CHART_X 320 / 2
@@ -34,6 +36,22 @@
 // How many numbers does the radial chart represent
 #define CHART_N 250
 #define D_THETA ( 2 * M_PI / (float) CHART_N )
+
+// Stats page
+
+// Histograms
+#define HIST_X 170
+#define HIST_W 140
+
+#define HIST_1_Y 110
+#define HIST_N_Y 10
+
+// Counters
+#define CNTR_X 150
+
+#define CNTR_PRIME_Y  40
+#define CNTR_TWIN_Y   120
+#define CNTR_PLNDR_Y  200
 
 // The erase/background color
 #define BACKGROUND BLACK
@@ -74,7 +92,7 @@ namespace display {
       Alignment al);
     void draw( const char *d );
     void draw_digits( const char* d, uint16_t col );    
-    void update_number( const char* d );    
+    void update_number( const char* d ); 
   };    
 
 
@@ -98,8 +116,12 @@ namespace display {
   struct Histogram
   {
     Elegoo_TFTLCD *tft;     // This is the pysical display
+    int16_t x, y, w;    
     uint8_t values[ 9 ];    // What we currently display
-    void draw( const float *h ) { ; }    
+    void init( Elegoo_TFTLCD *_tft );
+    void draw( const float *h );   
+    void draw_hist( uint16_t col );    
+    void update_values( const float *h );     
   };
 
   // The stats display 
@@ -108,15 +130,12 @@ namespace display {
   {
     Elegoo_TFTLCD *tft;  
     PrimeClock const *pc;
+    char m_string[ p_max_d + 1 ];  // string to hold prime_t numbers   
     DigitDisplay primes_found, twins_found, palindromes_found;
-    
-    void init( Elegoo_TFTLCD *_tft, PrimeClock *_pc ) 
-    { 
-      tft = _tft;
-      pc = _pc;
-      tft->fillScreen( RED );
-    }
-    void draw() { ; }
+    Histogram h1, hn;
+
+    void init( Elegoo_TFTLCD *_tft, PrimeClock *_pc );
+    void draw();
   };
 
 
@@ -130,9 +149,11 @@ namespace display {
     Stats stats_disp;
     enum class Screen{Corona=0, Stats};
     Screen screen_to_display;
+    bool just_restarted;  // We need this to avoid a refresh
 
     void init();
-    void initialize_display();    
+    void initialize_display();
+    void toggle_screen();
     void switch_to( Screen scr );    
     void next_tick();
     void refresh_display(); // A partial redraw when prime testing is taking long  

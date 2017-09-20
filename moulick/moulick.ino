@@ -47,8 +47,8 @@ void setup()
   moulick.init();
   ts.init();
 
-  initialize_timer1(250);  
-  // 250 Hz period for polling touch screen and redrawing screen for large
+  initialize_timer1(4);  
+  // 250 ms period for polling touch screen and redrawing screen for large
   // primes. This is kept slow to reduce overhead, but maintain responsiveness
   // Initialize this last
 }
@@ -69,11 +69,11 @@ void poll()
     {
       case touchscreen::TouchCommandType::Set:
         Serial.println( ts.new_m );
-        moulick.set_new_m( ts.new_m);
+        moulick.set_new_m( ts.new_m );
         break;
 
       case touchscreen::TouchCommandType::Switch:
-        // Not implemented
+        moulick.toggle_screen();
         break;
     }
   }  

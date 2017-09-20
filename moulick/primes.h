@@ -37,7 +37,7 @@ namespace primes {
 
 
   // buf should have size p_max_d + 1 and end in '\0'
-  char* prime_t_to_str( prime_t m, char *buf )
+  inline char* prime_t_to_str( prime_t m, char *buf )
   {
     char *m_ptr = buf + p_max_d;
     for(int i = 0 ; i < p_max_d ; i++)
@@ -94,8 +94,11 @@ namespace primes {
   {
     prime_t k_max,  // number of factors to check in total
             k;      // number of factors already checked
+    volatile bool abrt;  // flag used by external interrupt to break our routine
+                         // needs to be declared volatile, otherwise ISR won't be
+                         // able to change the value the PrimeTester loop is seeing
 
-    PrimeTester() { k = 0; k_max = 1; }
+    PrimeTester() { k = 0; k_max = 1; abrt = false; }
 
     // https://en.wikipedia.org/wiki/Primality_test
     // Implemented as a member function so that we can set the
@@ -105,25 +108,32 @@ namespace primes {
     // (e.g. via an interrupt)
     bool is_prime( prime_t m )
     {
-        k = 1;
-        k_max = 1;
-        
-        if( m == 2 | m == 3 ) return true;
-    
-        if( m % 2 == 0 ) return false;
-        if( m % 3 == 0 ) return false;
-        
-        prime_t k6;
+      abrt = false;
             
-        k_max = (sqrt(m) + 1) / 6;
-        for( k = 1; k <= k_max; k++ )  // divisible by 6*k +/- 1 ?
+      k = 1;
+      k_max = 1;
+      
+      if( m == 2 | m == 3 ) return true;
+  
+      if( m % 2 == 0 ) return false;
+      if( m % 3 == 0 ) return false;
+      
+      prime_t k6;
+          
+      k_max = (sqrt(m) + 1) / 6;
+      for( k = 1; k <= k_max; k++ )  // divisible by 6*k +/- 1 ?
+      {
+        if( abrt ) // Stop work and get out.
         {
-          k6 = 6 * k;
-          if( m % (k6 - 1) == 0 ) return false;
-          if( m % (k6 + 1) == 0 ) return false;      
+          k = 0; // Hack to avoid printing a spurious bar
+          return false;  
         }
-    
-        return true;
+        k6 = 6 * k;
+        if( m % (k6 - 1) == 0 ) return false;
+        if( m % (k6 + 1) == 0 ) return false;      
+      }
+  
+      return true;
     }
   };
 
@@ -143,6 +153,7 @@ namespace primes {
 
     void restart_clock_from( prime_t _m )
     {
+      pt.abrt = true;
       m = _m;
       last_prime = 1;
       primes_found = 0;

@@ -38,7 +38,7 @@ namespace display {
     cursor( theta, CHART_BASE_COL );
     
     // Erase lines ahead to give a nice advancing blank border
-    radial_line( theta, 1.0, BACKGROUND ); 
+    for( int i = 1; i < 5; i++) radial_line( theta, i / 4.0, BACKGROUND ); 
     radial_line( theta + D_THETA, 1.0, BACKGROUND );
     radial_line( theta, f, color );
   }
@@ -153,9 +153,74 @@ namespace display {
       // function is called again with this same m, we want to refresh
       return;      
     }
+
     byte m_type = COMPOSITE;  // We don't know what it is yet
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
   }
+
+  void Histogram::init( Elegoo_TFTLCD *_tft )
+  {
+    tft = _tft;
+    for( int i = 0 ; i < 9; i++ ) values[ i ] = 0;
+  }
+
+  void Histogram::draw( const float *h )
+  {
+
+  }
+
+  void Histogram::draw_hist( uint16_t col )
+  {
+
+  } 
+
+  void Histogram::update_values( const float *h )
+  {
+
+  }
+
+
+  void Stats::init( Elegoo_TFTLCD *_tft, PrimeClock *_pc ) 
+  { 
+    tft = _tft;
+    pc = _pc;
+    tft->fillScreen( BACKGROUND );
+
+    // Labels
+    tft->setTextSize( 1 );
+
+    tft->setCursor( CNTR_X - 6 * 1 * 6, CNTR_PRIME_Y - 10);
+    tft->setTextColor( CHART_PRIME_COL );  
+    tft->print( "Primes" );
+
+    tft->setCursor( CNTR_X - 6 * 1 * 11, CNTR_TWIN_Y - 10);
+    tft->setTextColor( CHART_TWIN_PRIME_COL );  
+    tft->print( "Twin primes" );
+
+    tft->setCursor( CNTR_X - 6 * 1 * 18, CNTR_PLNDR_Y - 10);
+    tft->setTextColor( CHART_PALINDROMIC_PRIME_COL );  
+    tft->print( "Palindromic primes" );
+    
+    // Odometers
+    primes_found.init( tft, 
+                      CNTR_X, CNTR_PRIME_Y, 2, WHITE, 
+                      DigitDisplay::Alignment::Right );
+    twins_found.init( tft, 
+                      CNTR_X, CNTR_TWIN_Y, 2, WHITE, 
+                      DigitDisplay::Alignment::Right );
+    palindromes_found.init(  tft, 
+                      CNTR_X, CNTR_PLNDR_Y, 2, WHITE, 
+                      DigitDisplay::Alignment::Right );     
+  }
+
+  void Stats::draw()
+  {
+    if( !pc->is_prime ) return;
+    primes_found.draw( prime_t_to_str( pc->primes_found, m_string ) );
+    twins_found.draw( prime_t_to_str( pc->twin_primes_found, m_string ) );
+    palindromes_found.draw( prime_t_to_str( pc->palindromic_primes_found, m_string ) );    
+  }
+
 
 
   void MoulickApp::init()
@@ -172,6 +237,14 @@ namespace display {
     tft->setRotation(1);  // Landscape, with the Uno's USB port  to the right
 
     switch_to( Screen::Corona );
+  }
+
+  void MoulickApp::toggle_screen()
+  {
+    if( screen_to_display == Screen::Corona )
+      switch_to( Screen::Stats );
+    else
+      switch_to( Screen::Corona );
   }
 
   void MoulickApp::switch_to( Screen scr )
