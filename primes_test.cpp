@@ -80,8 +80,32 @@ void test_primes()
 }
 
 
+void test_large_primes()
+{
+    PrimeTester pt;
+
+    /*
+        https://primes.utm.edu/lists/small/millions/
+        "... downloading primes is a better use of bandwidth then much of the downloading done on the Internet."
+        - Chris K. Caldwell
+
+        Thank's Chris!
+    */
+    uint32_t large_prime[] = { 15485863, 86028121, 472882027, 715225739, 982451653, (1L << 31) - 1L /* Euler */};
+    for( int i = 0; i < 6; i++ )
+        assert( pt.is_prime( large_prime[ i ]) );
+
+    // 715225739 + 2 is a prime
+    uint32_t large_composites[] = { 15485863 - 4, 86028121 - 2, 472882027 - 6, 715225739 + 4, 982451653 - 2, (1L << 31) + 3L };
+    for( int i = 0; i < 6; i++ )
+        assert( pt.is_prime( large_composites[ i ]) == false );
+
+    std::cout << "Large primes test passed" << std::endl;
+}
+
 int main()
 {
     test_digits();
     test_primes();
+    test_large_primes(); 
 }
