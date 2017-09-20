@@ -61,57 +61,30 @@ namespace display {
 
   using namespace primes;
 
+
   // KG's modification for Bresenham's algorithm for the radial plot
+  // modified from https://gist.github.com/bert/1085538#file-plot_line-c
   inline void fractional_bresenham(
     int16_t x0, int16_t y0,
     int16_t x1, int16_t y1,
     float f,
     uint16_t color,
-    Elegoo_TFTLCD *tft) 
+    Elegoo_TFTLCD *tft)
   {
-    int16_t steep = abs(y1 - y0) > abs(x1 - x0);
-    if (steep) {
-      swap(x0, y0);
-      swap(x1, y1);
-    }
-
-    if (x0 > x1) {
-      swap(x0, x1);
-      swap(y0, y1);
-    }
-
-    int16_t dx = x1 - x0,
-            x_end = f * dx + x0,
-            dy = abs(y1 - y0),
-            err = dx / 2,
-            ystep;
-  
-    if (y0 < y1) {
-      ystep = 1;
-    } else {
-      ystep = -1;
-    }
-  
-    for (; x0 <= x_end; x0++) 
+    int16_t dx    =  abs( x1 - x0 ), sx = x0 < x1 ? 1 : -1,
+            dy    = -abs( y1 - y0 ), sy = y0 < y1 ? 1 : -1, 
+            err   = dx + dy, e2, /* error value e_xy */
+            x_end = x0 + sx * dx * f;  // fractional end point
+   
+    for (;;)
     {
-      if (steep) 
-      {
-        tft->drawPixel(y0, x0, color);
-      } 
-      else 
-      {
-        tft->drawPixel(x0, y0, color);
-      }
-      err -= dy;
-      if (err < 0) 
-      {
-        y0 += ystep;
-        err += dx;
-      }
+      tft->drawPixel( x0, y0, color );
+      if( ((sx == 1) && (x0 >= x_end)) || ((sx == -1) && (x0 <= x_end)) ) break;
+      e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+      if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
     }
   }
-
-
 
   // The values are designed so that we can meaningfully AND them
   #define COMPOSITE   0b000
