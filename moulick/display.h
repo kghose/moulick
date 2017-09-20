@@ -61,6 +61,58 @@ namespace display {
 
   using namespace primes;
 
+  // KG's modification for Bresenham's algorithm for the radial plot
+  inline void fractional_bresenham(
+    int16_t x0, int16_t y0,
+    int16_t x1, int16_t y1,
+    float f,
+    uint16_t color,
+    Elegoo_TFTLCD *tft) 
+  {
+    int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+    if (steep) {
+      swap(x0, y0);
+      swap(x1, y1);
+    }
+
+    if (x0 > x1) {
+      swap(x0, x1);
+      swap(y0, y1);
+    }
+
+    int16_t dx = x1 - x0,
+            x_end = f * dx + x0,
+            dy = abs(y1 - y0),
+            err = dx / 2,
+            ystep;
+  
+    if (y0 < y1) {
+      ystep = 1;
+    } else {
+      ystep = -1;
+    }
+  
+    for (; x0 <= x_end; x0++) 
+    {
+      if (steep) 
+      {
+        tft->drawPixel(y0, x0, color);
+      } 
+      else 
+      {
+        tft->drawPixel(x0, y0, color);
+      }
+      err -= dy;
+      if (err < 0) 
+      {
+        y0 += ystep;
+        err += dx;
+      }
+    }
+  }
+
+
+
   // The values are designed so that we can meaningfully AND them
   #define COMPOSITE   0b000
   #define PRIME       0b111

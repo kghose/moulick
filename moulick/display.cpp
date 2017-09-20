@@ -37,9 +37,7 @@ namespace display {
     cursor( theta + D_THETA, BACKGROUND );
     cursor( theta, CHART_BASE_COL );
     
-    // Erase lines ahead to give a nice advancing blank border
-    for( int i = 1; i < 5; i++) radial_line( theta, i / 4.0, BACKGROUND ); 
-    radial_line( theta + D_THETA, 1.0, BACKGROUND );
+    radial_line( theta, 1.0, BACKGROUND );
     radial_line( theta, f, color );
   }
 
@@ -60,9 +58,11 @@ namespace display {
           ct = cos( theta );
     int x0 = CHART_X + CHART_R0 * st,
         y0 = CHART_Y - CHART_R0 * ct,
-        x1 = CHART_X + ( CHART_R0 + CHART_DR * f ) * st,
-        y1 = CHART_Y - ( CHART_R0 + CHART_DR * f ) * ct;
-    tft->drawLine( x0, y0, x1, y1, color );
+        x1 = CHART_X + ( CHART_R0 + CHART_DR ) * st,
+        y1 = CHART_Y - ( CHART_R0 + CHART_DR ) * ct;
+
+    //tft->drawLine( x0, y0, x1, y1, color );
+    fractional_bresenham( x0, y0, x1, y1, f, color, tft );
   }
 
   
