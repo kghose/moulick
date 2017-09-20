@@ -4,7 +4,6 @@
 #ifndef _PRIMES_H_
 #define _PRIMES_H_
 
-#include "Arduino.h"  // Needed for a bunch of defs
 
 namespace primes {
 
@@ -35,6 +34,23 @@ namespace primes {
   // const unsigned char p_max_d = 20;  // log10(2^64 -1)
   typedef uint32_t prime_t;  // prime number type
   const unsigned char p_max_d = 10;  // log10(2^32 -1)
+
+
+  // buf should have size p_max_d + 1 and end in '\0'
+  char* prime_t_to_str( prime_t m, char *buf )
+  {
+    char *m_ptr = buf + p_max_d;
+    for(int i = 0 ; i < p_max_d ; i++)
+    {
+      m_ptr--;
+      *m_ptr = (char) (m % 10 + 48);  // Convert remainder to ASCII for 0, 1, 2....
+      m /= 10;
+      if( m == 0 ) break;
+    }
+    // m_ptr now points to start of the converted number
+    return m_ptr;
+  }
+
 
   // Good enough code for finding the square root of m
   // We only need to check divisors up to this
@@ -147,15 +163,7 @@ namespace primes {
 
     void set_string_representation()
     {
-      prime_t _m = m;
-      m_ptr = m_string + p_max_d;
-      for(int i = 0 ; i < p_max_d ; i++)
-      {
-        m_ptr--;
-        *m_ptr = (char) (_m % 10 + 48);  // Convert remainder to ASCII for 0, 1, 2....
-        _m /= 10;
-        if( _m == 0) break;
-      }
+      m_ptr = prime_t_to_str( m, m_string );
       // m_ptr now points to start of the converted number
     }
 
