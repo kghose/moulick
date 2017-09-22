@@ -34,6 +34,11 @@ The following definitions are for the Elegoo TFT touch screen I used
 #define MINPRESSURE 10
 #define MAXPRESSURE 1000
 
+#define TOUCH_THRESHOLD 5
+
+#define SCREEN_X 240
+#define SCREEN_Y 320
+
 //Touch For New ILI9341 TP
 #define TS_MINX 120
 #define TS_MAXX 900

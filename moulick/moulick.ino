@@ -67,12 +67,12 @@ void poll()
   {
     switch( ts.cmd_type )
     {
-      case touchscreen::TouchCommandType::Set:
+      case touchscreen::TouchScreen::TouchCommandType::Set:
         Serial.println( ts.new_m );
         moulick.set_new_m( ts.new_m );
         break;
 
-      case touchscreen::TouchCommandType::Switch:
+      case touchscreen::TouchScreen::TouchCommandType::Switch:
         moulick.toggle_screen();
         break;
     }
