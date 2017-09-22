@@ -16,7 +16,7 @@ namespace moulickapp
     tft->begin( TFT_ID );
     tft->setRotation(1);  // Landscape, with the Uno's USB port  to the right
 
-    switch_to( Screen::Corona );
+    switch_to( Screen::Stats );
   }
 
   void MoulickApp::toggle_screen()
