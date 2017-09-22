@@ -5,7 +5,7 @@
   See the Readme file for details.
 */  
 #include "touch.h"
-#include "display.h"
+#include "moulickapp.h"
 
 
 void initialize_timer1(float refresh_rate = 20)
@@ -37,7 +37,7 @@ void initialize_timer1(float refresh_rate = 20)
 
 
 //serialport::SerialPort si;
-display::MoulickApp moulick;
+moulickapp::MoulickApp moulick;
 touchscreen::TouchScreen ts;
 
 void setup() 
@@ -45,7 +45,7 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(9600);
   moulick.init();
-  ts.init();
+  ts.init( moulick.tft );
 
   initialize_timer1(4);  
   // 250 ms period for polling touch screen and redrawing screen for large
@@ -85,5 +85,7 @@ void poll()
 
 ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
 {
+  noInterrupts();
   poll();
+  interrupts();
 }
