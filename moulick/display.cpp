@@ -158,15 +158,29 @@ namespace display {
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
   }
 
-  void Histogram::init( Elegoo_TFTLCD *_tft )
+  void Histogram::init( Elegoo_TFTLCD *_tft, int _x, int _y, int _w, int _h )
   {
     tft = _tft;
-    for( int i = 0 ; i < 9; i++ ) values[ i ] = 0;
+    x = _x; y = _y; w = _w; h = _h;
+    tft->drawFastHLine(x, y, w, WHITE);    
+    tft->setTextSize( 1 );
+    tft->setTextColor( WHITE );
+    for( int i = 0 ; i < 9; i++ ) 
+    {
+      tft->setCursor( x + ( (2 * i + 1) * w ) / 18, y + 5 );
+      tft->print( i + 1 );
+    }
   }
 
-  void Histogram::draw( const float *h )
+  void Histogram::draw( const prime_t *n, prime_t d )
   {
-
+    for( int i = 0 ; i < 9; i++ ) 
+    {
+      int _x = x + ( (2 * i + 1) * w ) / 18;
+      float f = (float) n[ i ] / (float) d ;
+      tft->drawFastVLine( _x, y - 2 - h, (1.0 - f) * h, BACKGROUND ); // Erase
+      tft->drawFastVLine( _x, y - 2 - f * h, f * h, WHITE ); // Draw      
+    }
   }
 
   void Histogram::draw_hist( uint16_t col )
@@ -210,7 +224,12 @@ namespace display {
                       DigitDisplay::Alignment::Right );
     palindromes_found.init(  tft, 
                       CNTR_X, CNTR_PLNDR_Y, 2, WHITE, 
-                      DigitDisplay::Alignment::Right );     
+                      DigitDisplay::Alignment::Right );
+                      
+    // Histograms
+    h1.init( tft, CNTR_X + 40, CNTR_PLNDR_Y, 100, 50 );
+    hn.init( tft, CNTR_X + 40, CNTR_TWIN_Y - 30, 100, 50 );
+    
   }
 
   void Stats::draw()
@@ -219,6 +238,9 @@ namespace display {
     primes_found.draw( prime_t_to_str( pc->primes_found, m_string ) );
     twins_found.draw( prime_t_to_str( pc->twin_primes_found, m_string ) );
     palindromes_found.draw( prime_t_to_str( pc->palindromic_primes_found, m_string ) );    
+    
+    h1.draw( pc->first_digit_hist, pc->primes_found ) ;
+    hn.draw( pc->last_digit_hist, pc->primes_found ) ;    
   }
 
 } // display
