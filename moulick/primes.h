@@ -209,8 +209,8 @@ namespace primes {
         }
         
         // Update histograms
-        first_digit_hist[ first_digit( m_string ) - 1 ]++;
-        last_digit_hist [ last_digit(  m_string ) - 1 ]++;    
+        first_digit_hist[ first_digit( m_ptr ) - 1 ]++;
+        last_digit_hist [ last_digit(  m_ptr ) - 1 ]++;    
       }
       else
         is_prime = false;  // The other flags don't matter then
