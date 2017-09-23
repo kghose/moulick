@@ -137,23 +137,7 @@ namespace display {
     void partial_draw();  // A partial update when prime testing is taking long
   };
 
-
-  // We no longer use this
-  struct Histogram
-  {
-    Elegoo_TFTLCD *tft;     // This is the pysical display
-    int16_t x, y;
-    uint8_t w, h;    
-    // uint8_t values[ 9 ];    
-    // Original plan was to remember the last histogram and erase it
-    // precisely, but this is taking too much memory!
-    void init( Elegoo_TFTLCD *_tft, int x, int y, int w, int h  );
-    void draw( const prime_t *n, prime_t d );   
-    void draw_hist( uint16_t col );    
-    void update_values( const float *h );     
-  };
-
-
+  
   struct Hist2D
   {
     Elegoo_TFTLCD *tft;     // This is the pysical display

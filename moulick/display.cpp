@@ -158,41 +158,6 @@ namespace display {
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
   }
 
-  void Histogram::init( Elegoo_TFTLCD *_tft, int _x, int _y, int _w, int _h )
-  {
-    tft = _tft;
-    x = _x; y = _y; w = _w; h = _h;
-    tft->drawFastHLine(x, y, w, WHITE);    
-    tft->setTextSize( 1 );
-    tft->setTextColor( WHITE );
-    for( int i = 0 ; i < 9; i++ ) 
-    {
-      tft->setCursor( x + ( (2 * i + 1) * w ) / 18, y + 5 );
-      tft->print( i + 1 );
-    }
-  }
-
-  void Histogram::draw( const prime_t *n, prime_t d )
-  {
-    for( int i = 0 ; i < 9; i++ ) 
-    {
-      int _x = x + ( (2 * i + 1) * w ) / 18;
-      float f = (float) n[ i ] / (float) d ;
-      tft->drawFastVLine( _x, y - 2 - h, (1.0 - f) * h, BACKGROUND ); // Erase
-      tft->drawFastVLine( _x, y - 2 - f * h, f * h, WHITE ); // Draw      
-    }
-  }
-
-  void Histogram::draw_hist( uint16_t col )
-  {
-
-  } 
-
-  void Histogram::update_values( const float *h )
-  {
-
-  }
-
 
   void Hist2D::init( Elegoo_TFTLCD *_tft, int _x, int _y, int _w )
   {
