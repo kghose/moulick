@@ -107,17 +107,13 @@ void test_rloks()
     int tot = 0, test_tot = 0;
     for( int i = 0 ; i < 4; i++ )
     {
-        // std::cout << std::endl;
         for( int j = 0; j < 4; j++ )
         {
-            // std::cout << rloks[ i ][ j ] << "(" << pc.rloks[ i ][ j ] << ") ";
             tot += rloks[ i ][ j ]; test_tot += pc.rloks[ i ][ j ];
             assert( rloks[ i ][ j ] == pc.rloks[ i ][ j ]);            
         }
     }
-    // std::cout << std::endl;
     assert( tot == test_tot );
-    //std::cout << tot << "(" << test_tot << ")";
 
     std::cout << "Digit transition test passed" << std::endl;        
 }
@@ -132,7 +128,7 @@ void test_large_primes()
         "... downloading primes is a better use of bandwidth then much of the downloading done on the Internet."
         - Chris K. Caldwell
 
-        Thank's Chris!
+        Thanks Chris!
     */
     uint32_t large_prime[] = { 15485863, 86028121, 472882027, 715225739, 982451653, (1L << 31) - 1L /* Euler */};
     for( int i = 0; i < 6; i++ )
