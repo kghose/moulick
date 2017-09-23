@@ -144,8 +144,9 @@ namespace primes {
             primes_found, 
             twin_primes_found,
             palindromic_primes_found,
-            first_digit_hist[ 9 ],  // can't use floats/doubles because of precision issues
-            last_digit_hist[ 9 ];         
+            // (1, 3, 7, 9) x (1, 3, 7, 9) grid
+            rloks[ 4 ][ 4 ];  // can't use floats/doubles because of precision issues
+
     PrimeTester pt;
     char m_string[ p_max_d + 1 ];  // m as a string
     char *m_ptr;  // pointer into m_string
@@ -159,11 +160,9 @@ namespace primes {
       primes_found = 0;
       twin_primes_found = 0;
       palindromic_primes_found = 0;
-      for( int i = 0; i < 9; i++ )
-      {
-        first_digit_hist[ i ] = 0;
-        last_digit_hist[ i ] = 0;
-      }
+      for( int i = 0; i < 4; i++ )
+        for( int j = 0; j < 4; j++ )
+          rloks[ i ][ j ] = 0;
     }
 
     PrimeClock()
@@ -178,6 +177,19 @@ namespace primes {
       // m_ptr now points to start of the converted number
     }
 
+    // last digit of number to index of rloks table
+    uint8_t ldi( prime_t n )
+    {
+      switch( n % 10 )
+      {
+        case 1: return 0;
+        case 3: return 1;
+        case 7: return 2;
+        case 9: return 3;
+        default: return 0;  // Testing should catch this
+      }
+    }
+
     // Increment the clock and test if this next number is prime
     void check_next()
     {
@@ -186,6 +198,9 @@ namespace primes {
       {
         is_prime = true;
         primes_found++;
+
+        // Update the Oliver/Soundararajan matrix
+        if( m > 7 ) rloks[ ldi( last_prime ) ][ ldi( m ) ]++;
 
         // Test twin primes
         if( m - last_prime == 2 )
@@ -197,7 +212,6 @@ namespace primes {
         }
         last_prime = m;
 
-
         set_string_representation();        
         // Test palindrome
         if( is_palindrome( m_ptr ) )
@@ -207,10 +221,7 @@ namespace primes {
         } else {
           is_palindromic_prime = false;           
         }
-        
-        // Update histograms
-        first_digit_hist[ first_digit( m_ptr ) - 1 ]++;
-        last_digit_hist [ last_digit(  m_ptr ) - 1 ]++;    
+
       }
       else
         is_prime = false;  // The other flags don't matter then
