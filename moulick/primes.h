@@ -62,7 +62,7 @@ namespace primes {
       return (prime_t) sqrt_m;
   }
 
-  // Given a string, check if it is a palindrome
+  
   inline bool is_palindrome( const char *buf )
   {
     for( int i = 0, j = strlen(buf) - 1; i < strlen(buf); i++, j--)
@@ -73,20 +73,10 @@ namespace primes {
     return true;
   }
 
-  inline int first_digit( const char *buf )
-  {
-    return buf[ 0 ] - 48;
-  }
-
-  inline int last_digit( const char *buf )
-  {
-    return buf[ strlen( buf ) - 1 ] - 48;
-  }
-
-
+  
   /*
     We structure the prime tester as a struct and expose
-    some internal variables so that we can interrupt it's 
+    some internal variables so that we can interrupt its 
     operation and peek into how many factors have been
     tested if we so wish
   */
@@ -145,7 +135,8 @@ namespace primes {
             twin_primes_found,
             palindromic_primes_found,
             // (1, 3, 7, 9) x (1, 3, 7, 9) grid
-            rloks[ 4 ][ 4 ];  // can't use floats/doubles because of precision issues
+            // see https://www.scientificamerican.com/article/peculiar-pattern-found-in-random-prime-numbers/                  
+            rloks[ 4 ][ 4 ]; // can't use floats/doubles because of precision issues
 
     PrimeTester pt;
     char m_string[ p_max_d + 1 ];  // m as a string
@@ -177,7 +168,7 @@ namespace primes {
       // m_ptr now points to start of the converted number
     }
 
-    // last digit of number to index of rloks table
+    // convert last digit of prime {1, 3, 7, 9} to index into rloks table {0, 1, 2, 3}
     uint8_t ldi( prime_t n )
     {
       switch( n % 10 )
@@ -190,7 +181,7 @@ namespace primes {
       }
     }
 
-    // Increment the clock and test if this next number is prime
+    // Increment the clock, test if this next number is prime and update metrics
     void check_next()
     {
       m++;
