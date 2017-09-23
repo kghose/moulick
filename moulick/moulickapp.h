@@ -5,7 +5,6 @@
 
 namespace moulickapp
 {
-  //using namespace primes;
   using namespace display;
 
   struct MoulickApp
