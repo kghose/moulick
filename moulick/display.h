@@ -120,7 +120,6 @@ namespace display {
     void update_number( const char* d ); 
   };    
 
-
   // The radial/coronal display
   struct Clock
   {
@@ -137,7 +136,6 @@ namespace display {
     void partial_draw();  // A partial update when prime testing is taking long
   };
 
-  
   struct Hist2D
   {
     Elegoo_TFTLCD *tft;     // This is the pysical display
@@ -149,9 +147,7 @@ namespace display {
     void draw_cell( uint8_t i, uint8_t j, uint8_t v );
   };
 
-
   // The stats display 
-  // TODO: This is a stub right now
   struct Stats
   {
     Elegoo_TFTLCD *tft;  
