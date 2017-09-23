@@ -194,6 +194,44 @@ namespace display {
   }
 
 
+  void Hist2D::init( Elegoo_TFTLCD *_tft, int _x, int _y, int _w )
+  {
+    tft = _tft;
+    hist_x = _x; hist_y = _y; hist_w = _w;
+    dx = hist_w / 4;
+
+    tft->setTextSize( 1 );
+    tft->setTextColor( WHITE );
+    char label[] = "1379";
+    for( int i = 0 ; i < 4; i++ ) 
+    {
+      tft->setCursor( hist_x + i * dx + dx / 2, hist_y - 9 );
+      tft->print( label[ i ] );
+
+      tft->setCursor( hist_x - 7, hist_y + i * dx + dx / 2 );
+      tft->print( label[ i ] );      
+    }
+  }
+
+  void Hist2D::draw( const prime_t rloks[ 4 ][ 4 ] )
+  {
+    for( int i = 0; i < 4; i++ )
+    {
+      prime_t tot = 0;
+      for( int j = 0; j < 4; j++ ) tot += rloks[ i ][ j ];
+      for( int j = 0; j < 4; j++ ) draw_cell( i, j, 255 * rloks[ i ][ j ] / tot);
+    }
+  }
+
+  void Hist2D::draw_cell( uint8_t i, uint8_t j, uint8_t v )
+  {
+    tft->fillRect( hist_x + j * dx, 
+                   hist_y + i * dx, 
+                   dx, dx, 
+                   ((v & 0xF8) << 8) | ((v & 0xFC) << 3) | (v >> 3) );
+  }
+
+
   void Stats::init( Elegoo_TFTLCD *_tft, PrimeClock *_pc ) 
   { 
     tft = _tft;
@@ -226,9 +264,8 @@ namespace display {
                       CNTR_X, CNTR_PLNDR_Y, 2, WHITE, 
                       DigitDisplay::Alignment::Right );
                       
-    // Histograms
-    h1.init( tft, CNTR_X + 40, CNTR_PLNDR_Y, 100, 50 );
-    hn.init( tft, CNTR_X + 40, CNTR_TWIN_Y - 30, 100, 50 );
+    // 2D Histogram
+    rloks.init( tft, CNTR_X + 40, 70, 100 );
     
   }
 
@@ -239,8 +276,7 @@ namespace display {
     twins_found.draw( prime_t_to_str( pc->twin_primes_found, m_string ) );
     palindromes_found.draw( prime_t_to_str( pc->palindromic_primes_found, m_string ) );    
     
-    h1.draw( pc->first_digit_hist, pc->primes_found ) ;
-    hn.draw( pc->last_digit_hist, pc->primes_found ) ;    
+    rloks.draw( pc->rloks ) ;
   }
 
 } // display

@@ -49,9 +49,9 @@
 // Counters
 #define CNTR_X 150 - 10
 
-#define CNTR_PRIME_Y  40
+#define CNTR_PRIME_Y  60
 #define CNTR_TWIN_Y   120
-#define CNTR_PLNDR_Y  200
+#define CNTR_PLNDR_Y  180
 
 // The erase/background color
 #define BACKGROUND BLACK
@@ -138,6 +138,7 @@ namespace display {
   };
 
 
+  // We no longer use this
   struct Histogram
   {
     Elegoo_TFTLCD *tft;     // This is the pysical display
@@ -152,6 +153,19 @@ namespace display {
     void update_values( const float *h );     
   };
 
+
+  struct Hist2D
+  {
+    Elegoo_TFTLCD *tft;     // This is the pysical display
+    int16_t hist_x, hist_y;
+    uint8_t hist_w, dx;
+
+    void init( Elegoo_TFTLCD *_tft, int x, int y, int w );
+    void draw( const prime_t rloks[ 4 ][ 4 ] );
+    void draw_cell( uint8_t i, uint8_t j, uint8_t v );
+  };
+
+
   // The stats display 
   // TODO: This is a stub right now
   struct Stats
@@ -160,7 +174,7 @@ namespace display {
     PrimeClock const *pc;
     char m_string[ p_max_d + 1 ];  // string to hold prime_t numbers   
     DigitDisplay primes_found, twins_found, palindromes_found;
-    Histogram h1, hn;
+    Hist2D rloks;
 
     void init( Elegoo_TFTLCD *_tft, PrimeClock *_pc );
     void draw();
