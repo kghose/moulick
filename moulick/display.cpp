@@ -11,7 +11,7 @@ namespace display {
   {
     tft = _tft;
     tft->fillCircle( CHART_X, CHART_Y, CHART_BASE_R1, CHART_BASE_COL );
-    tft->fillCircle( CHART_X, CHART_Y, CHART_BASE_R0, BACKGROUND );  
+    tft->fillCircle( CHART_X, CHART_Y, CHART_BASE_R0 - 1, BACKGROUND );  
   }
 
   void RadialChart::draw(prime_t m, float f, byte m_type)
