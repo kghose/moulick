@@ -19,9 +19,15 @@ namespace touchscreen
   
   TouchScreen ts = TouchScreen( XP, YP, XM, YM, TS_OHMS );
 
+  // Converts a 2D touch point to a prime.
+  // divides the right side of the screen into a 5 x 5 grid
+  // and converts (x, y) into a power of two going from 8 to 31
+  // the exception is the lowest left corner, which translates to 2^1
   prime_t point_to_prime(TSPoint p)
   {
-    return 111848 * ( p.y - 160 ) * p.x;
+    uint8_t pow = 5 * ( p.x / 48 ) + ( p.y - 160 ) / 32 + 7;
+    if( pow < 8 ) pow = 1;
+    return (uint32_t)1 << pow;
   }
 
   TSPoint get_touch_point()
@@ -35,8 +41,6 @@ namespace touchscreen
     pinMode(YP, OUTPUT);
 
     // scale raw touch coordinates to normalized coordinates
-    // this is the original system, so for us x is vertical y is horizontal
-    // 
     p.x = map(p.x, TS_MINX, TS_MAXX, 0, SCREEN_X);
     p.y = map(p.y, TS_MINY, TS_MAXY, SCREEN_Y, 0);
   
@@ -66,11 +70,11 @@ namespace touchscreen
     // from a value of m that is mapped to the co-ordinates
     void interpret_touch( TSPoint p )
     {
-      if( ( p.y < 100 ) )
+      if( ( p.y < 140 ) )
       {
         cmd_type = TouchCommandType::Switch;      
       }
-      else
+      if( ( p.y > 160 ) ) 
       {
         cmd_type = TouchCommandType::Set;
         new_m = point_to_prime( p );
