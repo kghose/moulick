@@ -10,7 +10,7 @@ and display prime numbers.
 ![alt text](media/coronal-display.jpeg)
 When you first switch it on Moulick will start computing primes from zero, showing the last found prime in the center
 of the circle, while showing details of the most recent computations on the clock face (which I also call the corona
-display because it reminds me of [this](solar-corona)). 
+display because it reminds me of [this][solar-corona]). 
 
 The circle represents 250 numbers and the length of the coronal lines emanating from it represents the fraction of divisors that had to be testing before deciding if that number was prime or not. Thus the longest lines (where all the divisors had to be tested) are primes. They are marked in red. Primes that are palindromic are marked in cyan. Primes that are the second of a pair of twin primes are marked in blue.  
 
