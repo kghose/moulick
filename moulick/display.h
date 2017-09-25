@@ -74,12 +74,14 @@ namespace display {
     int16_t dx    =  abs( x1 - x0 ), sx = x0 < x1 ? 1 : -1,
             dy    = -abs( y1 - y0 ), sy = y0 < y1 ? 1 : -1, 
             err   = dx + dy, e2, /* error value e_xy */
-            x_end = x0 + sx * dx * f;  // fractional end point
-   
+            x_end = x0 + ( x1 - x0 ) * f,  // fractional end point
+            y_end = y0 + ( y1 - y0 ) * f;
+    bool shallow = dx > -dy;
     for (;;)
     {
       tft->drawPixel( x0, y0, color );
-      if( ((sx == 1) && (x0 >= x_end)) || ((sx == -1) && (x0 <= x_end)) ) break;
+      if( shallow )  { if( x0 == x_end ) break; }
+               else  { if( y0 == y_end ) break; }
       e2 = 2 * err;
       if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
       if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
