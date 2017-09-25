@@ -1,9 +1,9 @@
 Moulick (Bengali - মৌলিক - for "prime") is a mathematical toy that uses an Arduino to continually compute 
 and display prime numbers.
 
-*picture of coronal display with labels here*
+![alt text](media/coronal-display.jpeg)
 
-*picture of stats display with labels here*
+![alt text](media/stats-display.jpg)
 
 *Link to video*
 
@@ -13,12 +13,16 @@ Manual
 ------
 When you first switch it on Moulick will start computing primes from zero, showing the last found prime in the center
 of the circle, while showing details of the most recent computations on the clock face (which I also call the corona
-display because it reminds me of [this](solar-corona)). The circle represents 250 numbers and the length of the coronal lines emanating from it represents the fraction of divisors that had to be testing before deciding if that number was prime or not. Thus the longest lines (where all the divisors had to be tested) are primes. They are marked in red. Primes that are palindromic are marked in cyan. Primes that are the second of a pair of twin primes are marked in blue.  
+display because it reminds me of [this](solar-corona)). 
+
+## Coronal display
+The circle represents 250 numbers and the length of the coronal lines emanating from it represents the fraction of divisors that had to be testing before deciding if that number was prime or not. Thus the longest lines (where all the divisors had to be tested) are primes. They are marked in red. Primes that are palindromic are marked in cyan. Primes that are the second of a pair of twin primes are marked in blue.  
 
 [solar-corona]: https://en.wikipedia.org/wiki/Corona#/media/File:Solar_eclipse_1999_4_NR.jpg
 
 Use a stylus to tap on the left half of the screen. You may have to hold down the stylus for upto a quarter second. This will switch the display from the corona to the stats page. Tapping the same corner again will go back to the coronal display.
 
+## Stats display
 The stats display shows how many primes, twin primes and palindromic primes have been found. The cryptic looking matrix on the right shows the last digit transition frequencies of consecutive primes. Say a prime ends in 1 and the following prime ends in 9. This adds a count to the (1, 9) (top right hand corner) box. If a prime ends in 9 and the following one ends in 9 it adds to the count in the (9, 9) (bottom right hand corner) box, and so on. If prime numbers are random then the matrix should glow an even grayish color, indicating that all transitions are equally probable. Watch the stats display for a while. Does it glow an even color? If you are curious, read the following [popular science account](rloks) (and this [paper](rloks-paper) - which is a little dense in mathematical notation).
 
 When you are on the coronal display if you tap on the right hand half of the display you will reset the clock to a different starting point and it will continue to find primes from there. Spend some time tapping at different points on the screen. Is there a pattern to where the clock restarts from when you tap?
