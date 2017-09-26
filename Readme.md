@@ -60,16 +60,21 @@ Blogposts
 ---------
 - [Main post introducing the project][main]
 - [Debouncing a touch screen][debounce]  ([Touchscreen oscilloscope app][osc])
-- [Arduino timer interrupts][timer]
 - [Why I needed `volatile`][volatile]
 - [A slight modification of Bresenham's algorithm][bresenham] ([IPython notebook](fractional-bresenham.ipynb))
-- [Last digit transition asymmetry][rloks] ([Original paper][rloks-paper] - the part I understood was the table, the rest is introduced with number theory formalism that I'm not trained in.)
 
 [main]: test
 [debounce]: https://kaushikghose.wordpress.com/2017/09/21/debouncing-a-touch-screen/
 [osc]: https://gist.github.com/kghose/0434bfa77d47ddabc4418efa3eee2a31
-[timer]: test
 [volatile]: https://kaushikghose.wordpress.com/2017/09/21/volatile/
-[bresenham]: test
+[bresenham]: https://kaushikghose.wordpress.com/2017/09/25/a-modification-to-bresenhams-algorithm/
+
+
+References
+----------
+- [Arduino timer interrupts][timer]
+- [Last digit transition asymmetry][rloks] ([Original paper][rloks-paper] - the part I understood was the table, the rest is introduced with number theory formalism that I'm not trained in.)
+
+[timer]: https://arduinodiy.wordpress.com/2012/02/28/timer-interrupts/
 [rloks]: https://www.nature.com/news/peculiar-pattern-found-in-random-prime-numbers-1.19550
 [rloks-paper]: https://arxiv.org/pdf/1603.03720.pdf
