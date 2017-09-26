@@ -18,8 +18,6 @@ void initialize_timer1(float refresh_rate = 20)
   * 16e6 / 256 = 62500
   * 62500 / 20 Hz = 3125
   */
-  
-  // 20 hz is good. Higher rates run the risk of not touching the main loop at all!
 
   
   // initialize timer1 
@@ -40,6 +38,10 @@ void initialize_timer1(float refresh_rate = 20)
 moulickapp::MoulickApp moulick;
 touchscreen::TouchScreen ts;
 
+#define REDRAW_PERIOD 4   // We ask for a re-draw at 1/4 the rate of the touchscreen poll
+#define TS_POLL_RATE  16  // We poll the touchscreen at 12 Hz
+uint8_t redraw_counter = REDRAW_PERIOD;
+
 void setup() 
 {
   // put your setup code here, to run once:
@@ -47,10 +49,7 @@ void setup()
   moulick.init();
   ts.init( moulick.tft );
 
-  initialize_timer1(4);  
-  // 250 ms period for polling touch screen and redrawing screen for large
-  // primes. This is kept slow to reduce overhead, but maintain responsiveness
-  // Initialize this last
+  initialize_timer1( TS_POLL_RATE );  // Initialize this last
 }
 
 void loop() 
@@ -68,7 +67,6 @@ void poll()
     switch( ts.cmd_type )
     {
       case touchscreen::TouchScreen::TouchCommandType::Set:
-        Serial.println( ts.new_m );
         moulick.set_new_m( ts.new_m );
         break;
 
@@ -78,14 +76,16 @@ void poll()
     }
   }  
 
-  // do a partial display refresh (the App decides if this is needed)
-  moulick.refresh_display();
+  if( --redraw_counter == 0 )
+  {
+    // do a partial display refresh (the App decides if this is needed)
+    moulick.refresh_display();
+    redraw_counter = REDRAW_PERIOD;
+  }
 }
 
 
 ISR(TIMER1_COMPA_vect)  // timer compare interrupt service routine
 {
-  noInterrupts();
   poll();
-  interrupts();
 }
