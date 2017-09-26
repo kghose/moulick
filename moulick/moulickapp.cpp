@@ -16,6 +16,7 @@ namespace moulickapp
     tft->begin( TFT_ID );
     tft->setRotation(1);  // Landscape, with the Uno's USB port to the right
 
+    enable_refresh = false;
     switch_to( Screen::Corona );
   }
 
@@ -44,8 +45,10 @@ namespace moulickapp
 
   void MoulickApp::next_tick()
   {
+    enable_refresh = true;  // We only need the partial refresh when we are in this blocking loop
     pc->check_next();
-        
+    enable_refresh = false;
+    
     noInterrupts();
     // We may get glitches if we don't stop any background drawing routine
     switch( screen_to_display )
@@ -66,6 +69,7 @@ namespace moulickapp
   // otherwise look frozen
   void MoulickApp::refresh_display()
   {
+    if( !enable_refresh ) return;
     switch( screen_to_display )
     {
       case Screen::Corona:

@@ -138,23 +138,12 @@ namespace display {
     if( pc->is_palindromic_prime ) m_type &= PALINDROME; 
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
 
-    if( pc->is_prime ) digit_display.draw( pc->m_as_string() );
-  
-    m_at_last_draw = pc->m;
+    if( pc->is_prime ) digit_display.draw( pc->m_as_string() );  
   }
 
   void Clock::partial_draw()
   {
-    // We only refresh this display if we are stuck on the same prime
-    if ( m_at_last_draw != pc->m ) 
-    {
-      m_at_last_draw = pc->m; 
-      // We've moved to a new m. We want to remember this, because if the 
-      // function is called again with this same m, we want to refresh
-      return;      
-    }
-
-    byte m_type = COMPOSITE;  // We don't know what it is yet
+    byte m_type = COMPOSITE;  // We only refresh when we are in the middle of testing
     radial_chart.draw( pc->m, min( pc->fraction_tested(), 1.0 ), m_type );
   }
 
@@ -182,9 +171,9 @@ namespace display {
   {
     for( int i = 0; i < 4; i++ )
     {
-      prime_t tot = 0;
-      for( int j = 0; j < 4; j++ ) tot += rloks[ i ][ j ];
-      for( int j = 0; j < 4; j++ ) draw_cell( i, j, 255 * rloks[ i ][ j ] / tot);
+      prime_t r_max = 0;
+      for( int j = 0; j < 4; j++ ) { if( r_max < rloks[ i ][ j ] ) r_max = rloks[ i ][ j ]; }
+      for( int j = 0; j < 4; j++ ) draw_cell( i, j, 255 * rloks[ i ][ j ] / r_max);
     }
   }
 

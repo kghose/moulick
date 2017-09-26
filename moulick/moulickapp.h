@@ -16,7 +16,7 @@ namespace moulickapp
     Stats stats_disp;
     enum class Screen{Corona=0, Stats};
     Screen screen_to_display;
-    bool just_restarted;  // We need this to avoid a refresh
+    bool enable_refresh;
 
     void init();
     void initialize_display();
