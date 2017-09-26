@@ -1,13 +1,11 @@
 Moulick (Bengali - মৌলিক - for "prime") is a mathematical toy that uses an Arduino to continually compute 
 and display prime numbers.
 
-*Link to video*
-
-*Link to blogpost*
+[Video demo](https://youtu.be/VL-EnUDCtP4)
 
 
 ## Coronal display
-![alt text](media/coronal-display.jpeg)
+[![Moulick coronal display - click for video](media/coronal-display.jpeg)](https://youtu.be/VL-EnUDCtP4)
 When you first switch it on Moulick will start computing primes from zero, showing the last found prime in the center
 of the circle, while showing details of the most recent computations on the clock face (which I also call the corona
 display because it reminds me of [this][solar-corona]). 
