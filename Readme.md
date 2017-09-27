@@ -61,7 +61,7 @@ Blogposts
 - [Why I needed `volatile`][volatile]
 - [A slight modification of Bresenham's algorithm][bresenham] ([IPython notebook](fractional-bresenham.ipynb))
 
-[main]: test
+[main]: https://kaushikghose.wordpress.com/2017/09/27/%E0%A6%AE%E0%A7%87%E0%A7%97%E0%A6%B2%E0%A6%BF%E0%A6%95-a-prime-number-toy/
 [debounce]: https://kaushikghose.wordpress.com/2017/09/21/debouncing-a-touch-screen/
 [osc]: https://gist.github.com/kghose/0434bfa77d47ddabc4418efa3eee2a31
 [volatile]: https://kaushikghose.wordpress.com/2017/09/21/volatile/
